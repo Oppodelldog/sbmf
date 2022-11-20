@@ -1,5 +1,7 @@
 # Simple Binary Message Format - Code Generator
 
+![image](image.png)
+
 This is a simple binary message format code generator.
 It generates code for encoding and decoding messages in a binary format.
 
