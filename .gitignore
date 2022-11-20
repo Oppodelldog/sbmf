@@ -1,0 +1,10 @@
+.idea
+
+example/cs/.idea
+example/cs/bin
+example/cs/obj
+example/cs/cs.sln
+example/cs/cs.csproj
+example/cs/cs.sln.DotSettings.user
+
+*/**/*.bin
