@@ -6,12 +6,12 @@ using System.IO;
 
 namespace Messages
 {
+    using MyFloat32 = System.Single;
+    using MyFloat64 = System.Double;
     using MyInteger32 = System.Int32;
     using MyInteger64 = System.Int64;
     using MyString = System.String;
     using MyBoolean = System.Boolean;
-    using MyFloat32 = System.Single;
-    using MyFloat64 = System.Double;
     public enum TestEnum {
 
         TestEnumValue1 = 1,
@@ -41,6 +41,9 @@ namespace Messages
         public Primitive P;
         public AliasLists AL;
         public PrimitiveLists PL;
+    }
+    public struct OneField {
+        public string S;
     }
     public struct Primitive {
         public int I32;
@@ -135,6 +138,20 @@ namespace Messages.Extensions
             o.P.UnmarshalBinary(reader);
             o.AL.UnmarshalBinary(reader);
             o.PL.UnmarshalBinary(reader);
+        }
+        public static byte[] MarshalBinary(this OneField o)
+        {
+            MemoryStream ms = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(ms);
+            WriteString(writer, o.S);
+            writer.Flush();
+
+            return ms.ToArray();
+        }
+
+        public static void UnmarshalBinary(ref this OneField o,BinaryReader reader)
+        {
+            o.S = ReadString(reader);
         }
         public static byte[] MarshalBinary(this Primitive o)
         {

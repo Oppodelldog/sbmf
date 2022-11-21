@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -320,6 +321,43 @@ func TestCrossLanguageAliasList(t *testing.T) {
 	assertSlicesEqual(t, al.MS, []MyString{"hello", "world"})
 	assertSlicesEqual(t, al.E, []TestEnum{TestEnumTestEnumValue1, TestEnumTestEnumValue2})
 	assertSlicesEqual(t, al.B, []MyBoolean{true, false, true})
+}
+
+func TestWriteMessage(t *testing.T) {
+	o := OneField{}
+	o.S = "hello-world"
+
+	f, err := os.Create("out-envelope-one-field.bin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	err = WriteMessage(f, o)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestReadMessage(t *testing.T) {
+	f, err := os.Open("out-envelope-one-field.bin")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer f.Close()
+
+	o, err := ReadMessage(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	oneField, ok := o.(OneField)
+	if !ok {
+		t.Fatal("expected OneField")
+	}
+
+	assertEquals(t, oneField.S, "hello-world")
 }
 
 func BenchmarkFoobar_MarshalBinary(b *testing.B) {

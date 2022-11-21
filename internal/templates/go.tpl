@@ -4,10 +4,20 @@ package {{.Package}}
 
 import (
 "bytes"
-"io"
 "encoding/binary"
+"errors"
+"fmt"
+"io"
 )
 
+var ErrUnknownMessage = errors.New("unknown message")
+
+const (
+// Messages
+{{- range $name, $id := .MessageIDs }}
+    {{ $name }}ID = int8({{ $id }})
+{{- end }}
+)
 const (
 // Enums
 {{- range $name, $values := .Enums }}
@@ -221,4 +231,44 @@ return e
 }
 
 return nil
+}
+
+func WriteMessage(w io.Writer, m interface{}) error {
+var messageID int8
+    switch m.(type) {
+    {{- range $name, $fields := .Messages }}
+        case {{ $name }}:
+        messageID = {{ $name }}ID
+    {{- end }}
+    }
+
+    if messageID == 0 {
+        return fmt.Errorf("%w: %T", ErrUnknownMessage, m)
+    }
+
+    if e :=binary.Write(w, binary.LittleEndian, messageID); e != nil {
+        return e
+    }
+
+    return marshal(m, w)
+}
+
+func ReadMessage(r io.Reader) (interface{}, error) {
+    var id int8
+    if e := binary.Read(r, binary.LittleEndian, &id); e != nil {
+        return nil, e
+    }
+
+    switch id {
+    {{- range $name, $fields := .Messages }}
+        case {{ $name }}ID:
+        var m {{ $name }}
+        if e := unmarshal(&m, r); e != nil {
+            return nil, e
+        }
+        return m, nil
+    {{- end }}
+    }
+
+    return nil, fmt.Errorf("%w: %d", ErrUnknownMessage,id)
 }

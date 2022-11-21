@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -33,6 +34,7 @@ type Generator struct {
 	MapMessageType  typeMapper
 	ProvideTemplate templateProvider
 	ListTypes       map[string]string
+	MessageIDs      map[MessageName]int
 }
 
 func (g *Generator) AddType(type_ TypeDef) {
@@ -46,11 +48,9 @@ func (g *Generator) AddEnum(name EnumName, values []EnumValue) {
 func (g *Generator) AddMessage(name MessageName, fields []FieldDef) {
 	g.Messages[name] = fields
 	for _, f := range fields {
-
 		if strings.HasPrefix(f.Type, "<") && strings.HasSuffix(f.Type, ">") {
 			g.AddListType(g.MapAliasType(f.Type[1 : len(f.Type)-1]))
 		}
-
 	}
 }
 
@@ -124,6 +124,17 @@ func (g *Generator) isMessage(t string) bool {
 	}
 
 	return false
+}
+
+func (g *Generator) CreateMessageIDs() {
+	var messageNames []string
+	for name := range g.Messages {
+		messageNames = append(messageNames, string(name))
+	}
+	sort.Strings(messageNames)
+	for _, name := range messageNames {
+		g.MessageIDs[MessageName(name)] = len(g.MessageIDs) + 1
+	}
 }
 
 type EnumName string
@@ -245,6 +256,7 @@ func Generate(file string) {
 				}
 			}
 		}
+		gen.CreateMessageIDs()
 
 		err = gen.WriteFile()
 		if err != nil {

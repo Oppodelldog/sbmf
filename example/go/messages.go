@@ -5,9 +5,22 @@ package data
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
+	"fmt"
 	"io"
 )
 
+var ErrUnknownMessage = errors.New("unknown message")
+
+const (
+	// Messages
+	AliasID          = int8(1)
+	AliasListsID     = int8(2)
+	FoobarID         = int8(3)
+	OneFieldID       = int8(4)
+	PrimitiveID      = int8(5)
+	PrimitiveListsID = int8(6)
+)
 const (
 	// Enums
 	TestEnumTestEnumValue1 TestEnum = 1
@@ -51,6 +64,9 @@ type (
 		AL AliasLists
 		PL PrimitiveLists
 	}
+	OneField struct {
+		S string
+	}
 	Primitive struct {
 		I32 int32
 		I64 int64
@@ -80,6 +96,8 @@ func unmarshal(v interface{}, r io.Reader) error {
 	case *AliasLists:
 		return v.UnmarshalBinary(r)
 	case *Foobar:
+		return v.UnmarshalBinary(r)
+	case *OneField:
 		return v.UnmarshalBinary(r)
 	case *Primitive:
 		return v.UnmarshalBinary(r)
@@ -201,6 +219,13 @@ func marshal(v interface{}, w io.Writer) error {
 		_, e = w.Write(d)
 		return e
 	case Foobar:
+		d, e := v.MarshalBinary()
+		if e != nil {
+			return e
+		}
+		_, e = w.Write(d)
+		return e
+	case OneField:
 		d, e := v.MarshalBinary()
 		if e != nil {
 			return e
@@ -421,6 +446,25 @@ func (m *Foobar) MarshalBinary() ([]byte, error) {
 
 	return w.Bytes(), nil
 }
+func (m *OneField) UnmarshalBinary(r io.Reader) error {
+	var e error
+	if e = unmarshal(&m.S, r); e != nil {
+		return e
+	}
+
+	return nil
+}
+
+func (m *OneField) MarshalBinary() ([]byte, error) {
+	var data []byte
+	w := bytes.NewBuffer(data)
+	var e error
+	if e = marshal(m.S, w); e != nil {
+		return nil, e
+	}
+
+	return w.Bytes(), nil
+}
 func (m *Primitive) UnmarshalBinary(r io.Reader) error {
 	var e error
 	if e = unmarshal(&m.I32, r); e != nil {
@@ -587,4 +631,80 @@ func marshalString(w io.Writer, v string) error {
 	}
 
 	return nil
+}
+
+func WriteMessage(w io.Writer, m interface{}) error {
+	var messageID int8
+	switch m.(type) {
+	case Alias:
+		messageID = AliasID
+	case AliasLists:
+		messageID = AliasListsID
+	case Foobar:
+		messageID = FoobarID
+	case OneField:
+		messageID = OneFieldID
+	case Primitive:
+		messageID = PrimitiveID
+	case PrimitiveLists:
+		messageID = PrimitiveListsID
+	}
+
+	if messageID == 0 {
+		return fmt.Errorf("%w: %T", ErrUnknownMessage, m)
+	}
+
+	if e := binary.Write(w, binary.LittleEndian, messageID); e != nil {
+		return e
+	}
+
+	return marshal(m, w)
+}
+
+func ReadMessage(r io.Reader) (interface{}, error) {
+	var id int8
+	if e := binary.Read(r, binary.LittleEndian, &id); e != nil {
+		return nil, e
+	}
+
+	switch id {
+	case AliasID:
+		var m Alias
+		if e := unmarshal(&m, r); e != nil {
+			return nil, e
+		}
+		return m, nil
+	case AliasListsID:
+		var m AliasLists
+		if e := unmarshal(&m, r); e != nil {
+			return nil, e
+		}
+		return m, nil
+	case FoobarID:
+		var m Foobar
+		if e := unmarshal(&m, r); e != nil {
+			return nil, e
+		}
+		return m, nil
+	case OneFieldID:
+		var m OneField
+		if e := unmarshal(&m, r); e != nil {
+			return nil, e
+		}
+		return m, nil
+	case PrimitiveID:
+		var m Primitive
+		if e := unmarshal(&m, r); e != nil {
+			return nil, e
+		}
+		return m, nil
+	case PrimitiveListsID:
+		var m PrimitiveLists
+		if e := unmarshal(&m, r); e != nil {
+			return nil, e
+		}
+		return m, nil
+	}
+
+	return nil, fmt.Errorf("%w: %d", ErrUnknownMessage, id)
 }

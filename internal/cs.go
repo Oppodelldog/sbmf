@@ -18,6 +18,7 @@ func newCSGenerator(version int, ns, o string) *Generator {
 		ListTypes:       map[string]string{},
 		Enums:           make(map[EnumName][]EnumValue),
 		Messages:        make(map[MessageName][]FieldDef),
+		MessageIDs:      map[MessageName]int{},
 	}
 }
 
