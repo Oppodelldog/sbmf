@@ -156,7 +156,7 @@ func Generate(file string) {
 	}
 
 	var gens []*Generator
-	version, ok := m["Version"].(int)
+	version, ok := m["version"].(int)
 	if !ok {
 		log.Fatal("Version missing")
 
@@ -262,14 +262,14 @@ func IncreaseVersion(file string) {
 		log.Fatalf("error3: %v", err)
 	}
 
-	version, ok := m["Version"].(int)
+	version, ok := m["version"].(int)
 	if !ok {
 		version = 1
 	} else {
 		version++
 	}
 
-	m["Version"] = version
+	m["version"] = version
 
 	data, err = yaml.Marshal(m)
 	if err != nil {
