@@ -7,10 +7,10 @@ using System.IO;
 namespace Messages
 {
     using MyBoolean = System.Boolean;
-    using MyInteger32 = System.Int32;
-    using MyInteger64 = System.Int64;
     using MyFloat32 = System.Single;
     using MyFloat64 = System.Double;
+    using MyInteger32 = System.Int32;
+    using MyInteger64 = System.Int64;
     using MyString = System.String;
     public enum TestEnum {
 

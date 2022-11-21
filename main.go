@@ -9,5 +9,7 @@ func main() {
 	if len(os.Args) < 2 {
 		panic("which sbmf yaml file?")
 	}
-	internal.Generate(os.Args[1])
+	file := os.Args[1]
+	internal.IncreaseVersion(file)
+	internal.Generate(file)
 }

@@ -1,14 +1,14 @@
 package internal
 
 import (
-	"fmt"
 	"sbmf/internal/templates"
 	"strings"
 	"text/template"
 )
 
-func newCSGenerator(ns, o string) *Generator {
+func newCSGenerator(version int, ns, o string) *Generator {
 	return &Generator{
+		Version:         version,
 		Output:          o,
 		Namespace:       ns,
 		MapAliasType:    csAliasType,
@@ -123,7 +123,6 @@ func csharpTemplate(findAliasType findAliasTypeFunc, isEnum isEnumFunc, isMessag
 			t2 := csType(t1)
 			t3 := csTypeToBinaryReadFuncName(t2)
 
-			fmt.Println("readFunc", t, t1, t2, t3)
 			return t3
 		},
 		"isString": func(t string) bool {

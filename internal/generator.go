@@ -18,6 +18,7 @@ type isMessageFunc func(t string) bool
 type templateProvider func(findAliasTypeFunc, isEnumFunc, isMessageFunc) (*template.Template, error)
 
 type Generator struct {
+	Version int
 	// Output file path
 	Output string
 	// CSharp namespace
@@ -155,6 +156,12 @@ func Generate(file string) {
 	}
 
 	var gens []*Generator
+	version, ok := m["Version"].(int)
+	if !ok {
+		log.Fatal("Version missing")
+
+	}
+
 	if v, ok := m["csharp"]; ok {
 		ns, ok := v.(map[interface{}]interface{})["namespace"].(string)
 		if !ok {
@@ -168,7 +175,7 @@ func Generate(file string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		gens = append(gens, newCSGenerator(ns, o))
+		gens = append(gens, newCSGenerator(version, ns, o))
 	}
 	if v, ok := m["go"]; ok {
 		p, ok := v.(map[interface{}]interface{})["package"].(string)
@@ -183,7 +190,7 @@ func Generate(file string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		gens = append(gens, newGoGenerator(p, o))
+		gens = append(gens, newGoGenerator(version, p, o))
 	}
 
 	for _, gen := range gens {
@@ -241,4 +248,36 @@ func Generate(file string) {
 
 func isListType(t string) bool {
 	return strings.HasPrefix(t, "<") && strings.HasSuffix(t, ">")
+}
+
+func IncreaseVersion(file string) {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	m := make(map[interface{}]interface{})
+
+	err = yaml.Unmarshal(data, &m)
+	if err != nil {
+		log.Fatalf("error3: %v", err)
+	}
+
+	version, ok := m["Version"].(int)
+	if !ok {
+		version = 1
+	} else {
+		version++
+	}
+
+	m["Version"] = version
+
+	data, err = yaml.Marshal(m)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	err = os.WriteFile(file, data, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

@@ -5,8 +5,9 @@ import (
 	"text/template"
 )
 
-func newGoGenerator(p, o string) *Generator {
+func newGoGenerator(version int, p, o string) *Generator {
 	return &Generator{
+		Version:         version,
 		Output:          o,
 		Package:         p,
 		MapAliasType:    goType,

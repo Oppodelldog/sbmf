@@ -16,12 +16,12 @@ const (
 
 type (
 	// Types
-	MyFloat64   float64
-	MyString    string
 	MyBoolean   bool
+	MyFloat32   float32
+	MyFloat64   float64
 	MyInteger32 int32
 	MyInteger64 int64
-	MyFloat32   float32
+	MyString    string
 
 	// Enums
 	TestEnum int
@@ -98,22 +98,6 @@ func unmarshal(v interface{}, r io.Reader) error {
 		return nil
 
 		// Types
-	case *MyFloat64:
-		var t float64
-		var e = unmarshal(&t, r)
-		if e != nil {
-			return e
-		}
-		*v = MyFloat64(t)
-		return nil
-	case *MyString:
-		var t string
-		var e = unmarshal(&t, r)
-		if e != nil {
-			return e
-		}
-		*v = MyString(t)
-		return nil
 	case *MyBoolean:
 		var t bool
 		var e = unmarshal(&t, r)
@@ -121,6 +105,22 @@ func unmarshal(v interface{}, r io.Reader) error {
 			return e
 		}
 		*v = MyBoolean(t)
+		return nil
+	case *MyFloat32:
+		var t float32
+		var e = unmarshal(&t, r)
+		if e != nil {
+			return e
+		}
+		*v = MyFloat32(t)
+		return nil
+	case *MyFloat64:
+		var t float64
+		var e = unmarshal(&t, r)
+		if e != nil {
+			return e
+		}
+		*v = MyFloat64(t)
 		return nil
 	case *MyInteger32:
 		var t int32
@@ -138,13 +138,13 @@ func unmarshal(v interface{}, r io.Reader) error {
 		}
 		*v = MyInteger64(t)
 		return nil
-	case *MyFloat32:
-		var t float32
+	case *MyString:
+		var t string
 		var e = unmarshal(&t, r)
 		if e != nil {
 			return e
 		}
-		*v = MyFloat32(t)
+		*v = MyString(t)
 		return nil
 
 		// ListTypes
@@ -227,18 +227,18 @@ func marshal(v interface{}, w io.Writer) error {
 		return binary.Write(w, binary.LittleEndian, int32(v))
 
 		// Types
-	case MyFloat64:
-		return marshal(float64(v), w)
-	case MyString:
-		return marshal(string(v), w)
 	case MyBoolean:
 		return marshal(bool(v), w)
+	case MyFloat32:
+		return marshal(float32(v), w)
+	case MyFloat64:
+		return marshal(float64(v), w)
 	case MyInteger32:
 		return marshal(int32(v), w)
 	case MyInteger64:
 		return marshal(int64(v), w)
-	case MyFloat32:
-		return marshal(float32(v), w)
+	case MyString:
+		return marshal(string(v), w)
 
 		// ListTypes
 	case []MyBoolean:
