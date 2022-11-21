@@ -156,13 +156,20 @@ func Generate(file string) {
 	}
 
 	var gens []*Generator
-	version, ok := m["version"].(int)
-	if !ok {
-		log.Fatal("Version missing")
+	attr, hasAttrbiutes := m["attributes"].(map[interface{}]interface{})
+	var version int
+	if hasAttrbiutes {
+		var ok bool
+		version, ok = attr["version"].(int)
+		if !ok {
+			log.Fatal("Version missing")
+		}
+	} else {
+		log.Fatal("attributes missing")
 
 	}
 
-	if v, ok := m["csharp"]; ok {
+	if v, ok := attr["csharp"]; ok {
 		ns, ok := v.(map[interface{}]interface{})["namespace"].(string)
 		if !ok {
 			ns = ""
@@ -177,7 +184,7 @@ func Generate(file string) {
 		}
 		gens = append(gens, newCSGenerator(version, ns, o))
 	}
-	if v, ok := m["go"]; ok {
+	if v, ok := attr["go"]; ok {
 		p, ok := v.(map[interface{}]interface{})["package"].(string)
 		if !ok {
 			p = ""
@@ -262,14 +269,20 @@ func IncreaseVersion(file string) {
 		log.Fatalf("error3: %v", err)
 	}
 
-	version, ok := m["version"].(int)
-	if !ok {
-		version = 1
+	a, hasAttributes := m["attributes"].(map[interface{}]interface{})
+	if !hasAttributes {
+		a = make(map[interface{}]interface{})
+		a["version"] = 1
+		m["attributes"] = a
 	} else {
-		version++
+		v, hasVersion := a["version"].(int)
+		if hasVersion {
+			a["version"] = v + 1
+		} else {
+			a["version"] = 1
+		}
+		m["attributes"].(map[interface{}]interface{})["version"] = a["version"]
 	}
-
-	m["version"] = version
 
 	data, err = yaml.Marshal(m)
 	if err != nil {
