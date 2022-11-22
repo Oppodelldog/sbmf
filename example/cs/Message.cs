@@ -299,5 +299,86 @@ namespace Messages.Extensions
         return new string(reader.ReadChars(reader.ReadInt32()));
     }
 
+    public static int GetMessageId(object message)
+    {
+        switch (message.GetType())
+        {
+            case Type t when t == typeof(Alias):
+                return 1;
+            case Type t when t == typeof(AliasLists):
+                return 2;
+            case Type t when t == typeof(Foobar):
+                return 3;
+            case Type t when t == typeof(OneField):
+                return 4;
+            case Type t when t == typeof(Primitive):
+                return 5;
+            case Type t when t == typeof(PrimitiveLists):
+                return 6;
+            default:
+                throw new Exception("Unknown message type " + message.GetType());
+        }
     }
+
+    public static void WriteMessage(BinaryWriter writer, object message)
+    {
+        writer.Write(GetMessageId(message));
+        switch (message.GetType())
+        {
+        case Type t when t == typeof(Alias):
+            writer.Write(((Alias)message).MarshalBinary());
+            break;
+        case Type t when t == typeof(AliasLists):
+            writer.Write(((AliasLists)message).MarshalBinary());
+            break;
+        case Type t when t == typeof(Foobar):
+            writer.Write(((Foobar)message).MarshalBinary());
+            break;
+        case Type t when t == typeof(OneField):
+            writer.Write(((OneField)message).MarshalBinary());
+            break;
+        case Type t when t == typeof(Primitive):
+            writer.Write(((Primitive)message).MarshalBinary());
+            break;
+        case Type t when t == typeof(PrimitiveLists):
+            writer.Write(((PrimitiveLists)message).MarshalBinary());
+            break;
+        default:
+            throw new Exception("Unknown message type " + message.GetType());
+        }
+    }
+
+    public static object ReadMessage(BinaryReader reader){
+        var messageId = reader.ReadInt32();
+        switch (messageId)
+        {
+            case 1:
+            var msgAlias = new Alias();
+            msgAlias.UnmarshalBinary(reader);
+            return msgAlias;
+            case 2:
+            var msgAliasLists = new AliasLists();
+            msgAliasLists.UnmarshalBinary(reader);
+            return msgAliasLists;
+            case 3:
+            var msgFoobar = new Foobar();
+            msgFoobar.UnmarshalBinary(reader);
+            return msgFoobar;
+            case 4:
+            var msgOneField = new OneField();
+            msgOneField.UnmarshalBinary(reader);
+            return msgOneField;
+            case 5:
+            var msgPrimitive = new Primitive();
+            msgPrimitive.UnmarshalBinary(reader);
+            return msgPrimitive;
+            case 6:
+            var msgPrimitiveLists = new PrimitiveLists();
+            msgPrimitiveLists.UnmarshalBinary(reader);
+            return msgPrimitiveLists;
+            default:
+                throw new Exception("Unknown message id " + messageId);
+        }
+    }
+}
 }

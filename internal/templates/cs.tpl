@@ -182,5 +182,47 @@ namespace {{ .Namespace }}.Extensions
         return new string(reader.ReadChars(reader.ReadInt32()));
     }
 
+    public static int GetMessageId(object message)
+    {
+        switch (message.GetType())
+        {
+    {{- range $name, $id := .MessageIDs }}
+            case Type t when t == typeof({{ $name }}):
+                return {{ $id }};
+    {{- end }}
+            default:
+                throw new Exception("Unknown message type " + message.GetType());
+        }
     }
+
+    public static void WriteMessage(BinaryWriter writer, object message)
+    {
+        writer.Write(GetMessageId(message));
+        switch (message.GetType())
+        {
+    {{- range $name, $message := .Messages }}
+        case Type t when t == typeof({{ $name }}):
+            writer.Write((({{ $name }})message).MarshalBinary());
+            break;
+    {{- end }}
+        default:
+            throw new Exception("Unknown message type " + message.GetType());
+        }
+    }
+
+    public static object ReadMessage(BinaryReader reader){
+        var messageId = reader.ReadInt32();
+        switch (messageId)
+        {
+        {{- range $name, $id := .MessageIDs }}
+            case {{ $id }}:
+            var msg{{ $name }} = new {{ $name }}();
+            msg{{ $name }}.UnmarshalBinary(reader);
+            return msg{{ $name }};
+        {{- end }}
+            default:
+                throw new Exception("Unknown message id " + messageId);
+        }
+    }
+}
 }

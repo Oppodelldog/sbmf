@@ -204,7 +204,7 @@ namespace cs
             Assert.AreEqual(fb.AL.MI64, fb2.AL.MI64);
             Assert.AreEqual(fb.AL.MS, fb2.AL.MS);
         }
-        
+
         [Test]
         public void TestCrossLanguageReadPrimitive()
         {
@@ -309,7 +309,26 @@ namespace cs
             Assert.AreEqual(new[] { TestEnum.TestEnumValue1, TestEnum.TestEnumValue2 }, p.AL.E);
             Assert.AreEqual(new[] { true, false }, p.AL.B);
         }
+
+        [Test]
+        public void TestOneFieldWriteMessage()
+        {
+            var m = new OneField() { S = "hello-world" };
+            var writer = new BinaryWriter(new FileStream("../../../out-one-field.bin", FileMode.Create));
+            BinaryExtensions.WriteMessage(writer, m);
+            writer.Flush();
+            writer.Close();
+        }
         
+        [Test]
+        public void TestOneFieldReadMessage()
+        {
+            var reader = new BinaryReader(new FileStream("../../../out-one-field.bin", FileMode.Open));
+            var m = BinaryExtensions.ReadMessage(reader);
+            Assert.AreEqual("hello-world", ((OneField)m).S);
+            reader.Close();
+        }
+
         private static void WriteFile(string name, byte[] data)
         {
             File.WriteAllBytes("../../../out-" + name, data);
