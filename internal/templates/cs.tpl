@@ -182,7 +182,7 @@ namespace {{ .Namespace }}.Extensions
         return new string(reader.ReadChars(reader.ReadInt32()));
     }
 
-    public static int GetMessageId(object message)
+    public static byte GetMessageId(object message)
     {
         switch (message.GetType())
         {
@@ -211,7 +211,7 @@ namespace {{ .Namespace }}.Extensions
     }
 
     public static object ReadMessage(BinaryReader reader){
-        var messageId = reader.ReadInt32();
+        var messageId = reader.ReadByte();
         switch (messageId)
         {
         {{- range $name, $id := .MessageIDs }}
