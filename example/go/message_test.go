@@ -361,6 +361,70 @@ func TestReadMessage(t *testing.T) {
 	assertEquals(t, oneField.S, "hello-world")
 }
 
+func TestReadPacket(t *testing.T) {
+
+	var buf = bytes.NewBuffer([]byte{})
+
+	packetLength := []byte{0x10, 0x00, 0x00, 0x00}
+	messageId := byte(4)
+	stringLength := []byte{0x0b, 0x00, 0x00, 0x00}
+	stringData := []byte("hello world")
+
+	buf.Write(packetLength)
+	buf.WriteByte(messageId)
+	buf.Write(stringLength)
+	buf.Write(stringData)
+
+	o, err := ReadPacket(buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	oneField, ok := o.(OneField)
+	if !ok {
+		t.Fatal("expected OneField")
+	}
+
+	assertEquals(t, oneField.S, "hello world")
+}
+
+func TestWritePacket(t *testing.T) {
+	o := OneField{}
+	o.S = "hello-world"
+
+	var buf = bytes.NewBuffer([]byte{})
+	var err = WritePacket(buf, o)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var data = buf.Bytes()
+
+	gotPacketLength := data[:4]
+	wantPacketLength := []byte{0x10, 0x00, 0x00, 0x00}
+	if !reflect.DeepEqual(gotPacketLength, wantPacketLength) {
+		t.Fatalf("gotPacketLength %v, wantPacketLength %v", gotPacketLength, wantPacketLength)
+	}
+
+	var gotId = int8(data[4:5][0])
+	var wantId = int8(4)
+	if gotId != wantId {
+		t.Fatalf("gotId %v, want %v", gotId, wantId)
+	}
+
+	var gotStringLength = int8(data[5:9][0])
+	var wantStringLength = int32(11)
+	if gotId != wantId {
+		t.Fatalf("gotStringLength %v, wantStringLength %v", gotStringLength, wantStringLength)
+	}
+
+	var gotS = string(data[9:])
+	var wantS = "hello-world"
+	if gotS != wantS {
+		t.Fatalf("gotS %v, want %v", gotS, wantS)
+	}
+}
+
 func TestPacketReader_Read(t *testing.T) {
 	var (
 		buffer = bytes.NewBuffer([]byte{})
