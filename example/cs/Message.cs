@@ -6,12 +6,12 @@ using System.IO;
 
 namespace Messages
 {
+    using MyBoolean = System.Boolean;
     using MyFloat32 = System.Single;
     using MyFloat64 = System.Double;
     using MyInteger32 = System.Int32;
     using MyInteger64 = System.Int64;
     using MyString = System.String;
-    using MyBoolean = System.Boolean;
     public enum TestEnum {
 
         TestEnumValue1 = 1,
@@ -299,7 +299,7 @@ namespace Messages.Extensions
         return new string(reader.ReadChars(reader.ReadInt32()));
     }
 
-    public static int GetMessageId(object message)
+    public static byte GetMessageId(object message)
     {
         switch (message.GetType())
         {
@@ -349,7 +349,7 @@ namespace Messages.Extensions
     }
 
     public static object ReadMessage(BinaryReader reader){
-        var messageId = reader.ReadInt32();
+        var messageId = reader.ReadByte();
         switch (messageId)
         {
             case 1:

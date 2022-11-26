@@ -2,6 +2,7 @@ package data
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -350,6 +351,70 @@ func TestReadMessage(t *testing.T) {
 	o, err := ReadMessage(f)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	oneField, ok := o.(OneField)
+	if !ok {
+		t.Fatal("expected OneField")
+	}
+
+	assertEquals(t, oneField.S, "hello-world")
+}
+
+func TestPacketReader_Read(t *testing.T) {
+	var (
+		buffer = bytes.NewBuffer([]byte{})
+		pr     = PacketReader{}
+	)
+	b, err := os.ReadFile("out-envelope-one-field.bin")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = binary.Write(buffer, binary.LittleEndian, int32(len(b)))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = buffer.Write(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	o := pr.Read(buffer)
+
+	oneField, ok := o.(OneField)
+	if !ok {
+		t.Fatal("expected OneField")
+	}
+
+	assertEquals(t, oneField.S, "hello-world")
+}
+
+func TestPacketReader_ReadStreamed(t *testing.T) {
+	var (
+		buffer = bytes.NewBuffer([]byte{})
+		pr     = PacketReader{}
+	)
+
+	b, err := os.ReadFile("out-envelope-one-field.bin")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = binary.Write(buffer, binary.LittleEndian, int32(len(b)))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	o := pr.Read(buffer)
+	if o != nil {
+		t.Fatalf("no object expected, but got %v", o)
+	}
+
+	for i := 0; i < len(b); i++ {
+		buffer.Write([]byte{b[i]})
+		o = pr.Read(buffer)
 	}
 
 	oneField, ok := o.(OneField)

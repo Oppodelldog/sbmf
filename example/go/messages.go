@@ -29,12 +29,12 @@ const (
 
 type (
 	// Types
-	MyBoolean   bool
-	MyFloat32   float32
 	MyFloat64   float64
 	MyInteger32 int32
 	MyInteger64 int64
 	MyString    string
+	MyBoolean   bool
+	MyFloat32   float32
 
 	// Enums
 	TestEnum int
@@ -116,22 +116,6 @@ func unmarshal(v interface{}, r io.Reader) error {
 		return nil
 
 		// Types
-	case *MyBoolean:
-		var t bool
-		var e = unmarshal(&t, r)
-		if e != nil {
-			return e
-		}
-		*v = MyBoolean(t)
-		return nil
-	case *MyFloat32:
-		var t float32
-		var e = unmarshal(&t, r)
-		if e != nil {
-			return e
-		}
-		*v = MyFloat32(t)
-		return nil
 	case *MyFloat64:
 		var t float64
 		var e = unmarshal(&t, r)
@@ -163,6 +147,22 @@ func unmarshal(v interface{}, r io.Reader) error {
 			return e
 		}
 		*v = MyString(t)
+		return nil
+	case *MyBoolean:
+		var t bool
+		var e = unmarshal(&t, r)
+		if e != nil {
+			return e
+		}
+		*v = MyBoolean(t)
+		return nil
+	case *MyFloat32:
+		var t float32
+		var e = unmarshal(&t, r)
+		if e != nil {
+			return e
+		}
+		*v = MyFloat32(t)
 		return nil
 
 		// ListTypes
@@ -252,10 +252,6 @@ func marshal(v interface{}, w io.Writer) error {
 		return binary.Write(w, binary.LittleEndian, int32(v))
 
 		// Types
-	case MyBoolean:
-		return marshal(bool(v), w)
-	case MyFloat32:
-		return marshal(float32(v), w)
 	case MyFloat64:
 		return marshal(float64(v), w)
 	case MyInteger32:
@@ -264,6 +260,10 @@ func marshal(v interface{}, w io.Writer) error {
 		return marshal(int64(v), w)
 	case MyString:
 		return marshal(string(v), w)
+	case MyBoolean:
+		return marshal(bool(v), w)
+	case MyFloat32:
+		return marshal(float32(v), w)
 
 		// ListTypes
 	case []MyBoolean:
@@ -707,4 +707,90 @@ func ReadMessage(r io.Reader) (interface{}, error) {
 	}
 
 	return nil, fmt.Errorf("%w: %d", ErrUnknownMessage, id)
+}
+
+func ReadPacket(r io.Reader) (interface{}, error) {
+	var length int32
+	if e := binary.Read(r, binary.LittleEndian, &length); e != nil {
+		return nil, e
+	}
+
+	var data = make([]byte, length)
+	if e := binary.Read(r, binary.LittleEndian, &data); e != nil {
+		return nil, e
+	}
+
+	return ReadMessage(bytes.NewReader(data))
+}
+
+func WritePacket(w io.Writer, m interface{}) error {
+	var data []byte
+	var buffer = bytes.NewBuffer(data)
+	if e := WriteMessage(buffer, m); e != nil {
+		return e
+	}
+
+	var length = int32(buffer.Len())
+	if e := binary.Write(w, binary.LittleEndian, length); e != nil {
+		return e
+	}
+
+	_, e := w.Write(buffer.Bytes())
+	return e
+}
+
+type PacketReader struct {
+	bytes.Buffer
+	nextPacketLength int32
+}
+
+func (pr *PacketReader) Read(r io.Reader) interface{} {
+	if pr.Len() == 0 && pr.nextPacketLength == 0 {
+		err := binary.Read(r, binary.LittleEndian, &pr.nextPacketLength)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if pr.Len() == int(pr.nextPacketLength) {
+		obj, err := ReadMessage(bytes.NewReader(pr.Bytes()))
+		if err != nil {
+			panic(err)
+		}
+		pr.nextPacketLength = 0
+		pr.Reset()
+
+		return obj
+	}
+
+	if pr.Len() != int(pr.nextPacketLength) {
+		readLength := int(pr.nextPacketLength) - pr.Len()
+
+		data := make([]byte, readLength)
+
+		i, err := r.Read(data)
+		if err != nil && !errors.Is(err, io.EOF) {
+			panic(err)
+		}
+
+		if i != 0 {
+			_, err = pr.Write(data[:i])
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+
+	if pr.Len() == int(pr.nextPacketLength) {
+		obj, err := ReadMessage(bytes.NewReader(pr.Bytes()))
+		if err != nil {
+			panic(err)
+		}
+		pr.nextPacketLength = 0
+		pr.Reset()
+
+		return obj
+	}
+
+	return nil
 }

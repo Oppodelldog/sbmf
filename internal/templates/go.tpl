@@ -272,3 +272,90 @@ func ReadMessage(r io.Reader) (interface{}, error) {
 
     return nil, fmt.Errorf("%w: %d", ErrUnknownMessage,id)
 }
+
+func ReadPacket(r io.Reader) (interface{}, error) {
+    var length int32
+    if e := binary.Read(r, binary.LittleEndian, &length); e != nil {
+        return nil, e
+    }
+
+    var data = make([]byte, length)
+    if e := binary.Read(r, binary.LittleEndian, &data); e != nil {
+        return nil, e
+    }
+
+    return ReadMessage(bytes.NewReader(data))
+}
+
+func WritePacket(w io.Writer, m interface{}) error {
+    var data []byte
+    var buffer = bytes.NewBuffer(data)
+    if e := WriteMessage(buffer, m); e != nil {
+        return e
+    }
+
+    var length = int32(buffer.Len())
+    if e := binary.Write(w, binary.LittleEndian, length); e != nil {
+        return e
+    }
+
+    _, e := w.Write(buffer.Bytes())
+    return e
+}
+
+
+type PacketReader struct {
+    bytes.Buffer
+    nextPacketLength int32
+}
+
+func (pr *PacketReader) Read(r io.Reader) interface{} {
+    if pr.Len() == 0 && pr.nextPacketLength == 0 {
+        err := binary.Read(r, binary.LittleEndian, &pr.nextPacketLength)
+        if err != nil {
+            panic(err)
+        }
+    }
+
+    if pr.Len() == int(pr.nextPacketLength) {
+        obj, err := ReadMessage(bytes.NewReader(pr.Bytes()))
+        if err != nil {
+            panic(err)
+        }
+        pr.nextPacketLength = 0
+        pr.Reset()
+
+        return obj
+    }
+
+    if pr.Len() != int(pr.nextPacketLength) {
+        readLength := int(pr.nextPacketLength) - pr.Len()
+
+        data := make([]byte, readLength)
+
+        i, err := r.Read(data)
+        if err != nil && !errors.Is(err, io.EOF) {
+            panic(err)
+        }
+
+        if i != 0 {
+            _, err = pr.Write(data[:i])
+            if err != nil {
+                panic(err)
+            }
+        }
+    }
+
+    if pr.Len() == int(pr.nextPacketLength) {
+        obj, err := ReadMessage(bytes.NewReader(pr.Bytes()))
+        if err != nil {
+            panic(err)
+        }
+        pr.nextPacketLength = 0
+        pr.Reset()
+
+        return obj
+    }
+
+    return nil
+}
