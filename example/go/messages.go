@@ -744,53 +744,33 @@ type PacketReader struct {
 	nextPacketLength int32
 }
 
-func (pr *PacketReader) Read(r io.Reader) interface{} {
-	if pr.Len() == 0 && pr.nextPacketLength == 0 {
-		err := binary.Read(r, binary.LittleEndian, &pr.nextPacketLength)
-		if err != nil {
-			panic(err)
-		}
+func (pr *PacketReader) Read(r io.Reader) (interface{}, error) {
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
 	}
 
-	if pr.Len() == int(pr.nextPacketLength) {
-		obj, err := ReadMessage(bytes.NewReader(pr.Bytes()))
-		if err != nil {
-			panic(err)
+	_, err = pr.Write(data)
+	if err != nil {
+		return nil, err
+	}
+
+	if pr.nextPacketLength == 0 && pr.Len() >= 4 {
+		var length int32
+		if err = binary.Read(&pr.Buffer, binary.LittleEndian, &length); err != nil {
+			return nil, err
+		}
+		pr.nextPacketLength = length
+	}
+
+	if pr.nextPacketLength > 0 && int32(pr.Len()) >= pr.nextPacketLength {
+		var data = make([]byte, pr.nextPacketLength)
+		if e := binary.Read(&pr.Buffer, binary.LittleEndian, &data); e != nil {
+			return nil, e
 		}
 		pr.nextPacketLength = 0
-		pr.Reset()
-
-		return obj
+		return ReadMessage(bytes.NewReader(data))
 	}
 
-	if pr.Len() != int(pr.nextPacketLength) {
-		readLength := int(pr.nextPacketLength) - pr.Len()
-
-		data := make([]byte, readLength)
-
-		i, err := r.Read(data)
-		if err != nil && !errors.Is(err, io.EOF) {
-			panic(err)
-		}
-
-		if i != 0 {
-			_, err = pr.Write(data[:i])
-			if err != nil {
-				panic(err)
-			}
-		}
-	}
-
-	if pr.Len() == int(pr.nextPacketLength) {
-		obj, err := ReadMessage(bytes.NewReader(pr.Bytes()))
-		if err != nil {
-			panic(err)
-		}
-		pr.nextPacketLength = 0
-		pr.Reset()
-
-		return obj
-	}
-
-	return nil
+	return nil, nil
 }

@@ -381,7 +381,10 @@ func TestPacketReader_Read(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	o := pr.Read(buffer)
+	o, err := pr.Read(buffer)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	oneField, ok := o.(OneField)
 	if !ok {
@@ -402,19 +405,35 @@ func TestPacketReader_ReadStreamed(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = binary.Write(buffer, binary.LittleEndian, int32(len(b)))
+	var lengthBuffer = bytes.NewBuffer([]byte{})
+	err = binary.Write(lengthBuffer, binary.LittleEndian, int32(len(b)))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	o := pr.Read(buffer)
-	if o != nil {
-		t.Fatalf("no object expected, but got %v", o)
+	var o interface{}
+	for lengthBuffer.Len() > 0 {
+		readByte, err := lengthBuffer.ReadByte()
+		if err != nil {
+			t.Fatal(err)
+		}
+		buffer.WriteByte(readByte)
+		o, err = pr.Read(buffer)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if o != nil {
+			t.Fatal("expected nil")
+		}
 	}
 
 	for i := 0; i < len(b); i++ {
 		buffer.Write([]byte{b[i]})
-		o = pr.Read(buffer)
+		o, err = pr.Read(buffer)
+		if err != nil {
+			t.Fatal(err)
+		}
+
 	}
 
 	oneField, ok := o.(OneField)
@@ -444,6 +463,26 @@ func BenchmarkFoobar_UnmarshalBinary(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = foo.UnmarshalBinary(bytes.NewBuffer(d))
+	}
+}
+
+func BenchmarkPacketReader_Read(b *testing.B) {
+	data, err := os.ReadFile("out-envelope-one-field.bin")
+	if err != nil {
+		b.Fatal(err)
+	}
+	var buffer = bytes.NewBuffer([]byte{})
+	err = binary.Write(buffer, binary.LittleEndian, int32(len(data)))
+	if err != nil {
+		b.Fatal(err)
+	}
+	buffer.Write(data)
+
+	var pr = PacketReader{}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = pr.Read(buffer)
 	}
 }
 
