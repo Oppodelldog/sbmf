@@ -225,4 +225,32 @@ namespace {{ .Namespace }}.Extensions
         }
     }
 }
+
+
+public class PacketReader
+{
+    private readonly MemoryStream _buffer = new MemoryStream();
+    private int _nextPacketSize = 0;
+
+    public object Read(byte[] data)
+    {
+        _buffer.Write(data, 0, data.Length);
+
+        if (_nextPacketSize == 0 && _buffer.Length >= 4)
+        {
+            _buffer.Position = 0;
+            _nextPacketSize = new BinaryReader(_buffer).ReadInt32();
+        }
+
+        if (_nextPacketSize > 0 && _buffer.Length >= _nextPacketSize)
+        {
+            var result = BinaryExtensions.ReadMessage(new BinaryReader(_buffer));
+            _nextPacketSize = 0;
+
+            return result;
+        }
+
+        return null;
+    }
+}
 }

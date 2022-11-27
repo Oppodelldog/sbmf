@@ -6,12 +6,12 @@ using System.IO;
 
 namespace Messages
 {
-    using MyInteger64 = System.Int64;
-    using MyString = System.String;
     using MyBoolean = System.Boolean;
     using MyFloat32 = System.Single;
     using MyFloat64 = System.Double;
     using MyInteger32 = System.Int32;
+    using MyInteger64 = System.Int64;
+    using MyString = System.String;
     public enum TestEnum {
 
         TestEnumValue1 = 1,
@@ -379,6 +379,34 @@ namespace Messages.Extensions
             default:
                 throw new Exception("Unknown message id " + messageId);
         }
+    }
+}
+
+
+public class PacketReader
+{
+    private readonly MemoryStream _buffer = new MemoryStream();
+    private int _nextPacketSize = 0;
+
+    public object Read(byte[] data)
+    {
+        _buffer.Write(data, 0, data.Length);
+
+        if (_nextPacketSize == 0 && _buffer.Length >= 4)
+        {
+            _buffer.Position = 0;
+            _nextPacketSize = new BinaryReader(_buffer).ReadInt32();
+        }
+
+        if (_nextPacketSize > 0 && _buffer.Length >= _nextPacketSize)
+        {
+            var result = BinaryExtensions.ReadMessage(new BinaryReader(_buffer));
+            _nextPacketSize = 0;
+
+            return result;
+        }
+
+        return null;
     }
 }
 }

@@ -333,5 +333,21 @@ namespace cs
         {
             File.WriteAllBytes("../../../out-" + name, data);
         }
+        
+        [Test]
+        public void TestPacketReader()
+        {
+            var buffer = new MemoryStream();
+            var fileBytes = File.ReadAllBytes("../../../out-one-field.bin");
+            var binaryWriter = new BinaryWriter(buffer);
+            binaryWriter.Write(fileBytes.Length);
+            binaryWriter.Write(fileBytes);
+            
+            var pr = new PacketReader();
+
+            var m = pr.Read(buffer.ToArray());
+            
+            Assert.AreEqual("hello-world", ((OneField)m).S);
+        }
     }
 }
