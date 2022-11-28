@@ -30,10 +30,14 @@ func csType(t string) string {
 		return "int"
 	case "<i32>":
 		return "int[]"
+	case "<<i32>>":
+		return "int[][]"
 	case "i64":
 		return "long"
 	case "<i64>":
 		return "long[]"
+	case "<<i64>>":
+		return "long[][]"
 		//case "f32":
 		//return "float"
 		//case "<f32>":
@@ -63,10 +67,14 @@ func csAliasType(t string) string {
 		return "System.Int32"
 	case "<i32>":
 		return "System.Int32[]"
+	case "<<i32>>":
+		return "System.Int32[][]"
 	case "i64":
 		return "System.Int64"
 	case "<i64>":
 		return "System.Int64[]"
+	case "<<i64>>":
+		return "System.Int64[][]"
 		//case "f32":
 		//return "System.Single"
 		//case "<f32>":

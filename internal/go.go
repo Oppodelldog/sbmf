@@ -29,10 +29,14 @@ func goType(t string) string {
 		return "int32"
 	case "<i32>":
 		return "[]int32"
+	case "<<i32>>":
+		return "[][]int32"
 	case "i64":
 		return "int64"
 	case "<i64>":
 		return "[]int64"
+	case "<<i64>>":
+		return "[][]int64"
 		//case "f32":
 		//return "float32"
 		//case "<f32>":

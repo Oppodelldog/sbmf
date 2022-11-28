@@ -43,6 +43,8 @@ namespace cs
             {
                 I32 = new[] { 1, 2, 3 },
                 I64 = new[] { 4L, 5L, 6L },
+                II32 = new[] { new[] { 7, 8, 9 }, new[] { 10, 11, 12 } },
+                II64 = new[] { new[] { 13L, 14L, 15L }, new[] { 16L, 17L, 18L } },
                 //F32 = new[] { 7.7f, 8.8f, 9.9f },
                 //F64 = new[] { 10.10d, 11.11d, 12.12d },
                 S = new[] { "hello", "world" },
@@ -57,6 +59,8 @@ namespace cs
 
             Assert.AreEqual(p.I32, p2.I32);
             Assert.AreEqual(p.I64, p2.I64);
+            Assert.AreEqual(p.II32, p2.II32);
+            Assert.AreEqual(p.II64, p2.II64);
             //Assert.AreEqual(p.F32, p2.F32);
             //Assert.AreEqual(p.F64, p2.F64);
             Assert.AreEqual(p.S, p2.S);

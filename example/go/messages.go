@@ -29,10 +29,10 @@ const (
 
 type (
 	// Types
-	MyString    string
 	MyBoolean   bool
 	MyInteger32 int32
 	MyInteger64 int64
+	MyString    string
 
 	// Enums
 	TestEnum int
@@ -68,10 +68,12 @@ type (
 		B   bool
 	}
 	PrimitiveLists struct {
-		I32 []int32
-		I64 []int64
-		S   []string
-		B   []bool
+		I32  []int32
+		I64  []int64
+		II32 [][]int32
+		II64 [][]int64
+		S    []string
+		B    []bool
 	}
 )
 
@@ -106,14 +108,6 @@ func unmarshal(v interface{}, r io.Reader) error {
 		return nil
 
 		// Types
-	case *MyString:
-		var t string
-		var e = unmarshal(&t, r)
-		if e != nil {
-			return e
-		}
-		*v = MyString(t)
-		return nil
 	case *MyBoolean:
 		var t bool
 		var e = unmarshal(&t, r)
@@ -138,6 +132,14 @@ func unmarshal(v interface{}, r io.Reader) error {
 		}
 		*v = MyInteger64(t)
 		return nil
+	case *MyString:
+		var t string
+		var e = unmarshal(&t, r)
+		if e != nil {
+			return e
+		}
+		*v = MyString(t)
+		return nil
 
 		// ListTypes
 	case *[]MyBoolean:
@@ -149,6 +151,10 @@ func unmarshal(v interface{}, r io.Reader) error {
 	case *[]MyString:
 		return unmarshalSlice(r, v)
 	case *[]TestEnum:
+		return unmarshalSlice(r, v)
+	case *[][]int32:
+		return unmarshalSlice(r, v)
+	case *[][]int64:
 		return unmarshalSlice(r, v)
 	case *[]bool:
 		return unmarshalSlice(r, v)
@@ -218,14 +224,14 @@ func marshal(v interface{}, w io.Writer) error {
 		return binary.Write(w, binary.LittleEndian, int32(v))
 
 		// Types
-	case MyString:
-		return marshal(string(v), w)
 	case MyBoolean:
 		return marshal(bool(v), w)
 	case MyInteger32:
 		return marshal(int32(v), w)
 	case MyInteger64:
 		return marshal(int64(v), w)
+	case MyString:
+		return marshal(string(v), w)
 
 		// ListTypes
 	case []MyBoolean:
@@ -237,6 +243,10 @@ func marshal(v interface{}, w io.Writer) error {
 	case []MyString:
 		return marshalSlice(w, v)
 	case []TestEnum:
+		return marshalSlice(w, v)
+	case [][]int32:
+		return marshalSlice(w, v)
+	case [][]int64:
 		return marshalSlice(w, v)
 	case []bool:
 		return marshalSlice(w, v)
@@ -440,6 +450,12 @@ func (m *PrimitiveLists) UnmarshalBinary(r io.Reader) error {
 	if e = unmarshal(&m.I64, r); e != nil {
 		return e
 	}
+	if e = unmarshal(&m.II32, r); e != nil {
+		return e
+	}
+	if e = unmarshal(&m.II64, r); e != nil {
+		return e
+	}
 	if e = unmarshal(&m.S, r); e != nil {
 		return e
 	}
@@ -458,6 +474,12 @@ func (m *PrimitiveLists) MarshalBinary() ([]byte, error) {
 		return nil, e
 	}
 	if e = marshal(m.I64, w); e != nil {
+		return nil, e
+	}
+	if e = marshal(m.II32, w); e != nil {
+		return nil, e
+	}
+	if e = marshal(m.II64, w); e != nil {
 		return nil, e
 	}
 	if e = marshal(m.S, w); e != nil {

@@ -5,7 +5,7 @@ attributes:
   go:
     output: /home/nils/go/src/github.com/Oppodelldog/sbmf/example/go/messages.go
     package: data
-  version: 44
+  version: 57
 enums:
   TestEnum:
   - TestEnumValue1: 1
@@ -19,6 +19,8 @@ messages:
 - PrimitiveLists:
   - I32: <i32>
   - I64: <i64>
+  - II32: <<i32>>
+  - II64: <<i64>>
   - S: <str>
   - B: <bool>
 - Alias:

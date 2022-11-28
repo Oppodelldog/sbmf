@@ -38,13 +38,13 @@ namespace {{ .Namespace }}.Extensions
             BinaryWriter writer = new BinaryWriter(ms);
         {{- range $fields }}
             {{- if isStringList .Type }}
-            writer.Write(o.{{ .Name }},o.{{ .Name }}.Length);
+            writer.WriteList(o.{{ .Name }});
             {{- else if isString .Type }}
             WriteString(writer, o.{{ .Name }});
             {{- else if isPrimitive .Type }}
             writer.Write(o.{{ .Name }});
             {{- else if isList .Type }}
-            writer.Write(o.{{ .Name }},o.{{ .Name }}.Length);
+            writer.WriteList(o.{{ .Name }});
             {{- else if isEnum .Type }}
             writer.Write((int)o.{{ .Name }});
             {{- else if isMessage .Type }}
@@ -82,8 +82,15 @@ namespace {{ .Namespace }}.Extensions
     {{- end }}
 
 
-    public static void Write(this BinaryWriter writer, IEnumerable list, int length)
+    public static void WriteList(this BinaryWriter writer, IEnumerable list)
     {
+        if(list == null)
+        {
+            writer.Write(0);
+            return;
+        }
+
+        var length = ((Array)list).Length;
         writer.Write(length);
         foreach (var item in list)
         {
@@ -117,6 +124,10 @@ namespace {{ .Namespace }}.Extensions
                 writer.Write((int)item);
             }
         {{- end }}
+            else if(item.GetType().IsArray)
+         {
+                writer.WriteList((IEnumerable)item);
+            }
             else
             {
                 throw new Exception("Unknown type");
@@ -162,6 +173,12 @@ namespace {{ .Namespace }}.Extensions
                 result[i] = (T)(object)reader.ReadInt32();
             }
         {{- end }}
+            else if (typeof(T).IsArray)
+            {
+                var method = typeof(BinaryExtensions).GetMethod(nameof(ReadList));
+                var generic = method.MakeGenericMethod(typeof(T).GetElementType());
+                result[i] = (T)generic.Invoke(null, new object[] { reader });
+            }
             else
             {
                 throw new Exception("Unknown type");

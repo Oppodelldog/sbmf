@@ -48,6 +48,8 @@ namespace Messages
     public struct PrimitiveLists {
         public int[] I32;
         public long[] I64;
+        public int[][] II32;
+        public long[][] II64;
         public string[] S;
         public bool[] B;
     }
@@ -83,11 +85,11 @@ namespace Messages.Extensions
         {
             MemoryStream ms = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(ms);
-            writer.Write(o.MI32,o.MI32.Length);
-            writer.Write(o.MI64,o.MI64.Length);
-            writer.Write(o.MS,o.MS.Length);
-            writer.Write(o.E,o.E.Length);
-            writer.Write(o.B,o.B.Length);
+            writer.WriteList(o.MI32);
+            writer.WriteList(o.MI64);
+            writer.WriteList(o.MS);
+            writer.WriteList(o.E);
+            writer.WriteList(o.B);
             writer.Flush();
 
             return ms.ToArray();
@@ -159,10 +161,12 @@ namespace Messages.Extensions
         {
             MemoryStream ms = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(ms);
-            writer.Write(o.I32,o.I32.Length);
-            writer.Write(o.I64,o.I64.Length);
-            writer.Write(o.S,o.S.Length);
-            writer.Write(o.B,o.B.Length);
+            writer.WriteList(o.I32);
+            writer.WriteList(o.I64);
+            writer.WriteList(o.II32);
+            writer.WriteList(o.II64);
+            writer.WriteList(o.S);
+            writer.WriteList(o.B);
             writer.Flush();
 
             return ms.ToArray();
@@ -172,13 +176,22 @@ namespace Messages.Extensions
         {
             o.I32 = reader.ReadList<int>();
             o.I64 = reader.ReadList<long>();
+            o.II32 = reader.ReadList<int[]>();
+            o.II64 = reader.ReadList<long[]>();
             o.S = reader.ReadList<string>();
             o.B = reader.ReadList<System.Boolean>();
         }
 
 
-    public static void Write(this BinaryWriter writer, IEnumerable list, int length)
+    public static void WriteList(this BinaryWriter writer, IEnumerable list)
     {
+        if(list == null)
+        {
+            writer.Write(0);
+            return;
+        }
+
+        var length = ((Array)list).Length;
         writer.Write(length);
         foreach (var item in list)
         {
@@ -209,6 +222,10 @@ namespace Messages.Extensions
             else if(item is TestEnum)
             {
                 writer.Write((int)item);
+            }
+            else if(item.GetType().IsArray)
+         {
+                writer.WriteList((IEnumerable)item);
             }
             else
             {
@@ -252,6 +269,12 @@ namespace Messages.Extensions
             else if (typeof(T) == typeof(TestEnum))
             {
                 result[i] = (T)(object)reader.ReadInt32();
+            }
+            else if (typeof(T).IsArray)
+            {
+                var method = typeof(BinaryExtensions).GetMethod(nameof(ReadList));
+                var generic = method.MakeGenericMethod(typeof(T).GetElementType());
+                result[i] = (T)generic.Invoke(null, new object[] { reader });
             }
             else
             {

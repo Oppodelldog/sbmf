@@ -48,8 +48,10 @@ func TestPrimitive(t *testing.T) {
 
 func TestPrimitiveLists(t *testing.T) {
 	foo := PrimitiveLists{
-		I32: []int32{math.MinInt32, 0, math.MaxInt32},
-		I64: []int64{math.MinInt64, 0, math.MaxInt64},
+		I32:  []int32{math.MinInt32, 0, math.MaxInt32},
+		I64:  []int64{math.MinInt64, 0, math.MaxInt64},
+		II32: [][]int32{{math.MinInt32}, {42, math.MaxInt32}},
+		II64: [][]int64{{math.MinInt64}, {42, math.MaxInt64}},
 		//F32: []float32{float32Min, 0, math.MaxFloat32},
 		//F64: []float64{float64Min, 0, math.MaxFloat64},
 		S: []string{"hello", "world"},
@@ -70,6 +72,8 @@ func TestPrimitiveLists(t *testing.T) {
 
 	assertSlicesEqual(t, foo2.I32, foo.I32)
 	assertSlicesEqual(t, foo2.I64, foo.I64)
+	assertSlicesEqual(t, foo2.II32, foo.II32)
+	assertSlicesEqual(t, foo2.II64, foo.II64)
 	//assertSlicesEqual(t, foo2.F32, foo.F32)
 	//assertSlicesEqual(t, foo2.F64, foo.F64)
 	assertSlicesEqual(t, foo2.S, foo.S)
