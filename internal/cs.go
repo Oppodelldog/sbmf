@@ -50,6 +50,8 @@ func csType(t string) string {
 		return "string"
 	case "<str>":
 		return "string[]"
+	case "<<str>>":
+		return "string[][]"
 	default:
 		if strings.HasPrefix(t, "<") && strings.HasSuffix(t, ">") {
 			return t[1:len(t)-1] + "[]"
@@ -87,6 +89,8 @@ func csAliasType(t string) string {
 		return "System.String"
 	case "<str>":
 		return "System.String[]"
+	case "<<str>>":
+		return "System.String[][]"
 	default:
 		if strings.HasPrefix(t, "<") && strings.HasSuffix(t, ">") {
 			return t[1:len(t)-1] + "[]"

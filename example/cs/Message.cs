@@ -51,6 +51,7 @@ namespace Messages
         public int[][] II32;
         public long[][] II64;
         public string[] S;
+        public string[][] S2;
         public bool[] B;
     }
 }
@@ -166,6 +167,7 @@ namespace Messages.Extensions
             writer.WriteList(o.II32);
             writer.WriteList(o.II64);
             writer.WriteList(o.S);
+            writer.WriteList(o.S2);
             writer.WriteList(o.B);
             writer.Flush();
 
@@ -179,6 +181,7 @@ namespace Messages.Extensions
             o.II32 = reader.ReadList<int[]>();
             o.II64 = reader.ReadList<long[]>();
             o.S = reader.ReadList<string>();
+            o.S2 = reader.ReadList<string[]>();
             o.B = reader.ReadList<System.Boolean>();
         }
 

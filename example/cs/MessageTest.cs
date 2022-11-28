@@ -48,6 +48,7 @@ namespace cs
                 //F32 = new[] { 7.7f, 8.8f, 9.9f },
                 //F64 = new[] { 10.10d, 11.11d, 12.12d },
                 S = new[] { "hello", "world" },
+                S2 = new[] { new[] { "hello", "world" }, new[] { "you","are" ,"wonderful" } },
                 B = new[] { true, false, true }
             };
 
@@ -64,6 +65,7 @@ namespace cs
             //Assert.AreEqual(p.F32, p2.F32);
             //Assert.AreEqual(p.F64, p2.F64);
             Assert.AreEqual(p.S, p2.S);
+            Assert.AreEqual(p.S2, p2.S2);
             Assert.AreEqual(p.B, p2.B);
         }
 

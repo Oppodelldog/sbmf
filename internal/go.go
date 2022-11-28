@@ -49,6 +49,8 @@ func goType(t string) string {
 		return "string"
 	case "<str>":
 		return "[]string"
+	case "<<str>>":
+		return "[][]string"
 	default:
 		if isListType(t) {
 			return "[]" + t[1:len(t)-1]

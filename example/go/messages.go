@@ -73,6 +73,7 @@ type (
 		II32 [][]int32
 		II64 [][]int64
 		S    []string
+		S2   [][]string
 		B    []bool
 	}
 )
@@ -155,6 +156,8 @@ func unmarshal(v interface{}, r io.Reader) error {
 	case *[][]int32:
 		return unmarshalSlice(r, v)
 	case *[][]int64:
+		return unmarshalSlice(r, v)
+	case *[][]string:
 		return unmarshalSlice(r, v)
 	case *[]bool:
 		return unmarshalSlice(r, v)
@@ -247,6 +250,8 @@ func marshal(v interface{}, w io.Writer) error {
 	case [][]int32:
 		return marshalSlice(w, v)
 	case [][]int64:
+		return marshalSlice(w, v)
+	case [][]string:
 		return marshalSlice(w, v)
 	case []bool:
 		return marshalSlice(w, v)
@@ -459,6 +464,9 @@ func (m *PrimitiveLists) UnmarshalBinary(r io.Reader) error {
 	if e = unmarshal(&m.S, r); e != nil {
 		return e
 	}
+	if e = unmarshal(&m.S2, r); e != nil {
+		return e
+	}
 	if e = unmarshal(&m.B, r); e != nil {
 		return e
 	}
@@ -483,6 +491,9 @@ func (m *PrimitiveLists) MarshalBinary() ([]byte, error) {
 		return nil, e
 	}
 	if e = marshal(m.S, w); e != nil {
+		return nil, e
+	}
+	if e = marshal(m.S2, w); e != nil {
 		return nil, e
 	}
 	if e = marshal(m.B, w); e != nil {

@@ -54,8 +54,9 @@ func TestPrimitiveLists(t *testing.T) {
 		II64: [][]int64{{math.MinInt64}, {42, math.MaxInt64}},
 		//F32: []float32{float32Min, 0, math.MaxFloat32},
 		//F64: []float64{float64Min, 0, math.MaxFloat64},
-		S: []string{"hello", "world"},
-		B: []bool{true, false},
+		S:  []string{"hello", "world"},
+		S2: [][]string{{"hello", "world"}, {"you", "are", "wonderful"}},
+		B:  []bool{true, false},
 	}
 
 	d, err := foo.MarshalBinary()
@@ -77,6 +78,7 @@ func TestPrimitiveLists(t *testing.T) {
 	//assertSlicesEqual(t, foo2.F32, foo.F32)
 	//assertSlicesEqual(t, foo2.F64, foo.F64)
 	assertSlicesEqual(t, foo2.S, foo.S)
+	assertSlicesEqual(t, foo2.S2, foo.S2)
 	assertSlicesEqual(t, foo2.B, foo.B)
 }
 
