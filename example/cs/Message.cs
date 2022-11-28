@@ -7,8 +7,6 @@ using System.IO;
 namespace Messages
 {
     using MyBoolean = System.Boolean;
-    using MyFloat32 = System.Single;
-    using MyFloat64 = System.Double;
     using MyInteger32 = System.Int32;
     using MyInteger64 = System.Int64;
     using MyString = System.String;
@@ -21,8 +19,6 @@ namespace Messages
     public struct Alias {
         public MyInteger32 MI32;
         public MyInteger64 MI64;
-        public MyFloat32 MF32;
-        public MyFloat64 MF64;
         public MyString MS;
         public TestEnum E;
         public MyBoolean B;
@@ -30,8 +26,6 @@ namespace Messages
     public struct AliasLists {
         public MyInteger32[] MI32;
         public MyInteger64[] MI64;
-        public MyFloat32[] MF32;
-        public MyFloat64[] MF64;
         public MyString[] MS;
         public TestEnum[] E;
         public MyBoolean[] B;
@@ -48,16 +42,12 @@ namespace Messages
     public struct Primitive {
         public int I32;
         public long I64;
-        public float F32;
-        public double F64;
         public string S;
         public System.Boolean B;
     }
     public struct PrimitiveLists {
         public int[] I32;
         public long[] I64;
-        public float[] F32;
-        public double[] F64;
         public string[] S;
         public bool[] B;
     }
@@ -73,8 +63,6 @@ namespace Messages.Extensions
             BinaryWriter writer = new BinaryWriter(ms);
             writer.Write(o.MI32);
             writer.Write(o.MI64);
-            writer.Write(o.MF32);
-            writer.Write(o.MF64);
             WriteString(writer, o.MS);
             writer.Write((int)o.E);
             writer.Write(o.B);
@@ -87,8 +75,6 @@ namespace Messages.Extensions
         {
             o.MI32 = reader.ReadInt32();
             o.MI64 = reader.ReadInt64();
-            o.MF32 = reader.ReadSingle();
-            o.MF64 = reader.ReadDouble();
             o.MS = ReadString(reader);
             o.E = (TestEnum)reader.ReadInt32();
             o.B = reader.ReadBoolean();
@@ -99,8 +85,6 @@ namespace Messages.Extensions
             BinaryWriter writer = new BinaryWriter(ms);
             writer.Write(o.MI32,o.MI32.Length);
             writer.Write(o.MI64,o.MI64.Length);
-            writer.Write(o.MF32,o.MF32.Length);
-            writer.Write(o.MF64,o.MF64.Length);
             writer.Write(o.MS,o.MS.Length);
             writer.Write(o.E,o.E.Length);
             writer.Write(o.B,o.B.Length);
@@ -113,8 +97,6 @@ namespace Messages.Extensions
         {
             o.MI32 = reader.ReadList<int>();
             o.MI64 = reader.ReadList<long>();
-            o.MF32 = reader.ReadList<float>();
-            o.MF64 = reader.ReadList<double>();
             o.MS = reader.ReadList<string>();
             o.E = reader.ReadList<TestEnum>();
             o.B = reader.ReadList<System.Boolean>();
@@ -159,8 +141,6 @@ namespace Messages.Extensions
             BinaryWriter writer = new BinaryWriter(ms);
             writer.Write(o.I32);
             writer.Write(o.I64);
-            writer.Write(o.F32);
-            writer.Write(o.F64);
             WriteString(writer, o.S);
             writer.Write(o.B);
             writer.Flush();
@@ -172,8 +152,6 @@ namespace Messages.Extensions
         {
             o.I32 = reader.ReadInt32();
             o.I64 = reader.ReadInt64();
-            o.F32 = reader.ReadSingle();
-            o.F64 = reader.ReadDouble();
             o.S = ReadString(reader);
             o.B = reader.ReadBoolean();
         }
@@ -183,8 +161,6 @@ namespace Messages.Extensions
             BinaryWriter writer = new BinaryWriter(ms);
             writer.Write(o.I32,o.I32.Length);
             writer.Write(o.I64,o.I64.Length);
-            writer.Write(o.F32,o.F32.Length);
-            writer.Write(o.F64,o.F64.Length);
             writer.Write(o.S,o.S.Length);
             writer.Write(o.B,o.B.Length);
             writer.Flush();
@@ -196,8 +172,6 @@ namespace Messages.Extensions
         {
             o.I32 = reader.ReadList<int>();
             o.I64 = reader.ReadList<long>();
-            o.F32 = reader.ReadList<float>();
-            o.F64 = reader.ReadList<double>();
             o.S = reader.ReadList<string>();
             o.B = reader.ReadList<System.Boolean>();
         }

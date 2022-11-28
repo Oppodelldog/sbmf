@@ -34,14 +34,14 @@ func csType(t string) string {
 		return "long"
 	case "<i64>":
 		return "long[]"
-	case "f32":
-		return "float"
-	case "<f32>":
-		return "float[]"
-	case "f64":
-		return "double"
-	case "<f64>":
-		return "double[]"
+		//case "f32":
+		//return "float"
+		//case "<f32>":
+		//return "float[]"
+		//case "f64":
+		//return "double"
+		//case "<f64>":
+		//return "double[]"
 	case "str":
 		return "string"
 	case "<str>":
@@ -67,14 +67,14 @@ func csAliasType(t string) string {
 		return "System.Int64"
 	case "<i64>":
 		return "System.Int64[]"
-	case "f32":
-		return "System.Single"
-	case "<f32>":
-		return "System.Single[]"
-	case "f64":
-		return "System.Double"
-	case "<f64>":
-		return "System.Double[]"
+		//case "f32":
+		//return "System.Single"
+		//case "<f32>":
+		//return "System.Single[]"
+		//case "f64":
+		//return "System.Double"
+		//case "<f64>":
+		//return "System.Double[]"
 	case "str":
 		return "System.String"
 	case "<str>":
@@ -94,20 +94,20 @@ func csTypeToBinaryReadFuncName(t string) string {
 		return "ReadInt32"
 	case "System.Int64":
 		return "ReadInt64"
-	case "System.Single":
-		return "ReadSingle"
-	case "System.Double":
-		return "ReadDouble"
+		//case "System.Single":
+		//return "ReadSingle"
+		//case "System.Double":
+		//return "ReadDouble"
 	case "System.Boolean":
 		return "ReadBoolean"
 	case "int":
 		return "ReadInt32"
 	case "long":
 		return "ReadInt64"
-	case "float":
-		return "ReadSingle"
-	case "double":
-		return "ReadDouble"
+		//case "float":
+		//return "ReadSingle"
+		//case "double":
+		//return "ReadDouble"
 	case "string":
 		return "ReadString"
 	default:
