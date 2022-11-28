@@ -48,7 +48,7 @@ namespace cs
                 //F32 = new[] { 7.7f, 8.8f, 9.9f },
                 //F64 = new[] { 10.10d, 11.11d, 12.12d },
                 S = new[] { "hello", "world" },
-                S2 = new[] { new[] { "hello", "world" }, new[] { "you","are" ,"wonderful" } },
+                S2 = new[] { new[] { "hello", "world" }, new[] { "you", "are", "wonderful" } },
                 B = new[] { true, false, true }
             };
 
@@ -254,9 +254,12 @@ namespace cs
 
             Assert.AreEqual(new[] { Int32.MinValue, 0, Int32.MaxValue }, p.I32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.I64);
+            Assert.AreEqual(new[] { new[] { Int32.MinValue }, new[] { 42, Int32.MaxValue } }, p.II32);
+            Assert.AreEqual(new[] { new[] { Int64.MinValue }, new[] { 42, Int64.MaxValue} }, p.II64);
             //Assert.AreEqual(new[] { Single.MinValue, 0, Single.MaxValue }, p.F32);
             //Assert.AreEqual(new[] { Double.MinValue, 0, Double.MaxValue, }, p.F64);
             Assert.AreEqual(new[] { "hello", "world" }, p.S);
+            Assert.AreEqual(new[] { new[] { "hello", "world" }, new[] { "you", "are", "wonderful" } }, p.S2);
             Assert.AreEqual(new[] { true, false }, p.B);
         }
 
@@ -325,7 +328,7 @@ namespace cs
             writer.Flush();
             writer.Close();
         }
-        
+
         [Test]
         public void TestOneFieldReadMessage()
         {
@@ -339,7 +342,7 @@ namespace cs
         {
             File.WriteAllBytes("../../../out-" + name, data);
         }
-        
+
         [Test]
         public void TestPacketReader()
         {
@@ -348,11 +351,11 @@ namespace cs
             var binaryWriter = new BinaryWriter(buffer);
             binaryWriter.Write(fileBytes.Length);
             binaryWriter.Write(fileBytes);
-            
+
             var pr = new PacketReader();
 
             var m = pr.Read(buffer.ToArray());
-            
+
             Assert.AreEqual("hello-world", ((OneField)m).S);
         }
     }

@@ -307,9 +307,12 @@ func TestCrossLanguagePrimitiveLists(t *testing.T) {
 
 	assertSlicesEqual(t, pl.I32, []int32{1, 2, 3})
 	assertSlicesEqual(t, pl.I64, []int64{4, 5, 6})
+	assertSlicesEqual(t, pl.II32, [][]int32{{7, 8, 9}, {10, 11, 12}})
+	assertSlicesEqual(t, pl.II64, [][]int64{{13, 14, 15}, {16, 17, 18}})
 	//assertSlicesEqual(t, pl.F32, []float32{7.7, 8.8, 9.9})
 	//assertSlicesEqual(t, pl.F64, []float64{10.10, 11.11, 12.12})
 	assertSlicesEqual(t, pl.S, []string{"hello", "world"})
+	assertSlicesEqual(t, pl.S2, [][]string{{"hello", "world"}, {"you", "are", "wonderful"}})
 	assertSlicesEqual(t, pl.B, []bool{true, false, true})
 }
 
