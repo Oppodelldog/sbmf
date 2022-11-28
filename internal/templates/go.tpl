@@ -42,7 +42,7 @@ type (
 {{- range $name, $fields := .Messages }}
     {{ $name }} struct {
     {{- range $fields }}
-        {{ .Name }} {{ .Type }}
+        {{ .Name }} {{range loop .Dim }}[]{{end}}{{ .Type }}
     {{- end }}
     }
 {{- end }}
@@ -85,9 +85,11 @@ return unmarshalString(r, v)
 {{- end }}
 
 // ListTypes
-{{- range $i, $name := .ListTypes }}
-    case *[]{{ $name }}:
-    return unmarshalSlice(r,v)
+{{- range $type, $dims := .ListTypes }}
+    {{- range $dims }}
+    case *{{range loop . }}[]{{end}}{{ $type }}:
+        return unmarshalSlice(r,v)
+    {{- end}}
 {{- end }}
 
 default:
@@ -124,9 +126,11 @@ return marshalString(w, v)
 {{- end }}
 
 // ListTypes
-{{- range  $type := .ListTypes }}
-    case []{{ $type }}:
-    return marshalSlice(w,v)
+{{- range  $type, $dims := .ListTypes }}
+    {{- range $dims }}
+    case {{ range loop . }}[]{{ end}}{{ $type }}:
+        return marshalSlice(w,v)
+    {{- end}}
 {{- end }}
 
 default:

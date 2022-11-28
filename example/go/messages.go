@@ -153,19 +153,19 @@ func unmarshal(v interface{}, r io.Reader) error {
 		return unmarshalSlice(r, v)
 	case *[]TestEnum:
 		return unmarshalSlice(r, v)
-	case *[][]int32:
-		return unmarshalSlice(r, v)
-	case *[][]int64:
-		return unmarshalSlice(r, v)
-	case *[][]string:
-		return unmarshalSlice(r, v)
 	case *[]bool:
 		return unmarshalSlice(r, v)
 	case *[]int32:
 		return unmarshalSlice(r, v)
+	case *[][]int32:
+		return unmarshalSlice(r, v)
 	case *[]int64:
 		return unmarshalSlice(r, v)
+	case *[][]int64:
+		return unmarshalSlice(r, v)
 	case *[]string:
+		return unmarshalSlice(r, v)
+	case *[][]string:
 		return unmarshalSlice(r, v)
 
 	default:
@@ -247,19 +247,19 @@ func marshal(v interface{}, w io.Writer) error {
 		return marshalSlice(w, v)
 	case []TestEnum:
 		return marshalSlice(w, v)
-	case [][]int32:
-		return marshalSlice(w, v)
-	case [][]int64:
-		return marshalSlice(w, v)
-	case [][]string:
-		return marshalSlice(w, v)
 	case []bool:
 		return marshalSlice(w, v)
 	case []int32:
 		return marshalSlice(w, v)
+	case [][]int32:
+		return marshalSlice(w, v)
 	case []int64:
 		return marshalSlice(w, v)
+	case [][]int64:
+		return marshalSlice(w, v)
 	case []string:
+		return marshalSlice(w, v)
+	case [][]string:
 		return marshalSlice(w, v)
 
 	default:

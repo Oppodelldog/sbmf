@@ -15,7 +15,7 @@ func newCSGenerator(version int, ns, o string) *Generator {
 		MapMessageType:  csType,
 		ProvideTemplate: csharpTemplate,
 		Types:           []TypeDef{},
-		ListTypes:       map[string]string{},
+		ListTypes:       map[string][]int{},
 		Enums:           make(map[EnumName][]EnumValue),
 		Messages:        make(map[MessageName][]FieldDef),
 		MessageIDs:      map[MessageName]int{},
@@ -28,32 +28,16 @@ func csType(t string) string {
 		return "System.Boolean"
 	case "i32":
 		return "int"
-	case "<i32>":
-		return "int[]"
-	case "<<i32>>":
-		return "int[][]"
 	case "i64":
 		return "long"
-	case "<i64>":
-		return "long[]"
-	case "<<i64>>":
-		return "long[][]"
 		//case "f32":
 		//return "float"
-		//case "<f32>":
-		//return "float[]"
 		//case "f64":
 		//return "double"
-		//case "<f64>":
-		//return "double[]"
 	case "str":
 		return "string"
-	case "<str>":
-		return "string[]"
-	case "<<str>>":
-		return "string[][]"
 	default:
-		if strings.HasPrefix(t, "<") && strings.HasSuffix(t, ">") {
+		if isListType(t) {
 			return t[1:len(t)-1] + "[]"
 		}
 	}
@@ -67,30 +51,14 @@ func csAliasType(t string) string {
 		return "System.Boolean"
 	case "i32":
 		return "System.Int32"
-	case "<i32>":
-		return "System.Int32[]"
-	case "<<i32>>":
-		return "System.Int32[][]"
 	case "i64":
 		return "System.Int64"
-	case "<i64>":
-		return "System.Int64[]"
-	case "<<i64>>":
-		return "System.Int64[][]"
 		//case "f32":
 		//return "System.Single"
-		//case "<f32>":
-		//return "System.Single[]"
 		//case "f64":
 		//return "System.Double"
-		//case "<f64>":
-		//return "System.Double[]"
 	case "str":
 		return "System.String"
-	case "<str>":
-		return "System.String[]"
-	case "<<str>>":
-		return "System.String[][]"
 	default:
 		if strings.HasPrefix(t, "<") && strings.HasSuffix(t, ">") {
 			return t[1:len(t)-1] + "[]"
@@ -142,18 +110,32 @@ func csharpTemplate(findAliasType findAliasTypeFunc, isEnum isEnumFunc, isMessag
 			t = findPrimitiveType(findAliasType)(t)
 			return t == "string"
 		},
-		"isStringList": func(t string) bool {
+		"isStringList": func(t string, dim int) bool {
 			tPrimitive := findPrimitiveType(findAliasType)(t)
-			return tPrimitive == "string" && isList(t)
+			return tPrimitive == "string" && dim >= 1
 		},
 		"isPrimitive": func(t string) bool {
 			t = findAliasType(t)
 			return csTypeToBinaryReadFuncName(t) != ""
 		},
-		"isList":            isList,
+		"isList":            func(i int) bool { return i >= 1 },
 		"isEnum":            isEnum,
 		"isMessage":         isMessage,
 		"findPrimitiveType": findPrimitiveType(findAliasType),
+		"loop": func(n int) []int {
+			a := make([]int, n)
+			for i := range a {
+				a[i] = i
+			}
+			return a
+		},
+		"loopless": func(n int) []int {
+			a := make([]int, n-1)
+			for i := range a {
+				a[i] = i
+			}
+			return a
+		},
 	})
 
 	var err error

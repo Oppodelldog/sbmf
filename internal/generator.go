@@ -33,7 +33,7 @@ type Generator struct {
 	MapAliasType    typeMapper
 	MapMessageType  typeMapper
 	ProvideTemplate templateProvider
-	ListTypes       map[string]string
+	ListTypes       map[string][]int
 	MessageIDs      map[MessageName]int
 }
 
@@ -48,9 +48,11 @@ func (g *Generator) AddEnum(name EnumName, values []EnumValue) {
 func (g *Generator) AddMessage(name MessageName, fields []FieldDef) {
 	g.Messages[name] = fields
 	for _, f := range fields {
-		if strings.HasPrefix(f.Type, "<") && strings.HasSuffix(f.Type, ">") {
-			g.AddListType(g.MapAliasType(f.Type[1 : len(f.Type)-1]))
+		if f.Dim == 0 {
+			continue
 		}
+
+		g.AddListType(g.MapAliasType(f.Type), f.Dim)
 	}
 }
 
@@ -106,8 +108,12 @@ func (g *Generator) AddInternalType(def TypeDef) {
 	g.InternalTypes = append(g.InternalTypes, def)
 }
 
-func (g *Generator) AddListType(aliasType string) {
-	g.ListTypes[aliasType] = aliasType
+func (g *Generator) AddListType(aliasType string, dimensions int) {
+	if _, exists := g.ListTypes[aliasType]; !exists {
+		g.ListTypes[aliasType] = []int{dimensions}
+	} else {
+		g.ListTypes[aliasType] = append(g.ListTypes[aliasType], dimensions)
+	}
 }
 
 func (g *Generator) isEnum(t string) bool {
@@ -152,6 +158,7 @@ type MessageName string
 type FieldDef struct {
 	Name string
 	Type string
+	Dim  int
 }
 
 func Generate(file string) {
@@ -248,7 +255,10 @@ func Generate(file string) {
 					for k3, v3 := range v2.(map[interface{}]interface{}) {
 						for _, v4 := range v3.([]interface{}) {
 							for k5, v5 := range v4.(map[interface{}]interface{}) {
-								fields = append(fields, FieldDef{Name: k5.(string), Type: v5.(string)})
+								var t = v5.(string)
+								var dim = strings.Count(t, "<")
+								t = t[dim : len(t)-dim]
+								fields = append(fields, FieldDef{Name: k5.(string), Type: t, Dim: dim})
 							}
 						}
 						gen.AddMessage(MessageName(k3.(string)), fields)
