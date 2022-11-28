@@ -21,7 +21,7 @@ namespace {{ .Namespace }}
 {{- range $name, $fields := .Messages }}
     public struct {{ $name }} {
     {{- range $fields }}
-        public {{ .Type }} {{ .Name }};
+        public {{ .Type }}{{range loop .Dim }}[]{{end}} {{ .Name }};
     {{- end }}
     }
 {{- end }}
@@ -37,14 +37,14 @@ namespace {{ .Namespace }}.Extensions
             MemoryStream ms = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(ms);
         {{- range $fields }}
-            {{- if isStringList .Type }}
+            {{- if isStringList .Type .Dim }}
             writer.WriteList(o.{{ .Name }});
             {{- else if isString .Type }}
             WriteString(writer, o.{{ .Name }});
+            {{- else if isList .Dim }}
+            writer.WriteList(o.{{ .Name }});
             {{- else if isPrimitive .Type }}
             writer.Write(o.{{ .Name }});
-            {{- else if isList .Type }}
-            writer.WriteList(o.{{ .Name }});
             {{- else if isEnum .Type }}
             writer.Write((int)o.{{ .Name }});
             {{- else if isMessage .Type }}
@@ -61,14 +61,14 @@ namespace {{ .Namespace }}.Extensions
         public static void UnmarshalBinary(ref this {{ $name }} o,BinaryReader reader)
         {
         {{- range $fields }}
-            {{- if isStringList .Type }}
-            o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}>();
+            {{- if isStringList .Type .Dim }}
+            o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}{{range loopless .Dim }}[]{{end}}>();
             {{- else if isString .Type }}
             o.{{ .Name }} = ReadString(reader);
+            {{- else if isList .Dim }}
+                o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}{{range loopless .Dim }}[]{{end}}>();
             {{- else if isPrimitive .Type }}
             o.{{ .Name }} = reader.{{ readFunc .Type }}();
-            {{- else if isList .Type }}
-            o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}>();
             {{- else if isEnum .Type }}
             o.{{ .Name }} = ({{ .Type }})reader.ReadInt32();
             {{- else if isMessage .Type }}

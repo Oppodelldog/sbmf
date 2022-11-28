@@ -6,10 +6,10 @@ using System.IO;
 
 namespace Messages
 {
+    using MyString = System.String;
     using MyBoolean = System.Boolean;
     using MyInteger32 = System.Int32;
     using MyInteger64 = System.Int64;
-    using MyString = System.String;
     public enum TestEnum {
 
         TestEnumValue1 = 1,
@@ -52,7 +52,7 @@ namespace Messages
         public long[][] II64;
         public string[] S;
         public string[][] S2;
-        public bool[] B;
+        public System.Boolean[] B;
     }
 }
 
@@ -98,11 +98,11 @@ namespace Messages.Extensions
 
         public static void UnmarshalBinary(ref this AliasLists o,BinaryReader reader)
         {
-            o.MI32 = reader.ReadList<int>();
-            o.MI64 = reader.ReadList<long>();
+                o.MI32 = reader.ReadList<int>();
+                o.MI64 = reader.ReadList<long>();
             o.MS = reader.ReadList<string>();
-            o.E = reader.ReadList<TestEnum>();
-            o.B = reader.ReadList<System.Boolean>();
+                o.E = reader.ReadList<TestEnum>();
+                o.B = reader.ReadList<System.Boolean>();
         }
         public static byte[] MarshalBinary(this Foobar o)
         {
@@ -176,13 +176,13 @@ namespace Messages.Extensions
 
         public static void UnmarshalBinary(ref this PrimitiveLists o,BinaryReader reader)
         {
-            o.I32 = reader.ReadList<int>();
-            o.I64 = reader.ReadList<long>();
-            o.II32 = reader.ReadList<int[]>();
-            o.II64 = reader.ReadList<long[]>();
+                o.I32 = reader.ReadList<int>();
+                o.I64 = reader.ReadList<long>();
+                o.II32 = reader.ReadList<int[]>();
+                o.II64 = reader.ReadList<long[]>();
             o.S = reader.ReadList<string>();
             o.S2 = reader.ReadList<string[]>();
-            o.B = reader.ReadList<System.Boolean>();
+                o.B = reader.ReadList<System.Boolean>();
         }
 
 
