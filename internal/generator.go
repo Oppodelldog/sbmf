@@ -112,7 +112,9 @@ func (g *Generator) AddListType(aliasType string, dimensions int) {
 	if _, exists := g.ListTypes[aliasType]; !exists {
 		g.ListTypes[aliasType] = []int{dimensions}
 	} else {
-		g.ListTypes[aliasType] = append(g.ListTypes[aliasType], dimensions)
+		if !contains(g.ListTypes[aliasType], dimensions) {
+			g.ListTypes[aliasType] = append(g.ListTypes[aliasType], dimensions)
+		}
 	}
 }
 
@@ -315,4 +317,14 @@ func IncreaseVersion(file string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func contains(dims []int, dimensions int) bool {
+	for _, d := range dims {
+		if d == dimensions {
+			return true
+		}
+	}
+
+	return false
 }
