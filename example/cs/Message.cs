@@ -6,10 +6,6 @@ using System.IO;
 
 namespace Messages
 {
-    using MyString = System.String;
-    using MyBoolean = System.Boolean;
-    using MyInteger32 = System.Int32;
-    using MyInteger64 = System.Int64;
     public enum TestEnum {
 
         TestEnumValue1 = 1,
@@ -17,18 +13,18 @@ namespace Messages
         TestEnumValue2 = 2,
     }
     public struct Alias {
-        public MyInteger32 MI32;
-        public MyInteger64 MI64;
-        public MyString MS;
+        public int MI32;
+        public long MI64;
+        public string MS;
         public TestEnum E;
-        public MyBoolean B;
+        public System.Boolean B;
     }
     public struct AliasLists {
-        public MyInteger32[] MI32;
-        public MyInteger64[] MI64;
-        public MyString[] MS;
+        public int[] MI32;
+        public long[] MI64;
+        public string[] MS;
         public TestEnum[] E;
-        public MyBoolean[] B;
+        public System.Boolean[] B;
     }
     public struct Foobar {
         public Alias A;

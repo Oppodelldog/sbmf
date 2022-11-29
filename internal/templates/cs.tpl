@@ -6,10 +6,6 @@ using System.IO;
 
 namespace {{ .Namespace }}
 {
-{{- range $name, $type := .Types }}
-    using {{ $type.Name }} = {{ $type.Type }};
-{{- end }}
-
 {{- range $name, $values := .Enums }}
     public enum {{ $name }} {
     {{- range $values }}
@@ -21,7 +17,7 @@ namespace {{ .Namespace }}
 {{- range $name, $fields := .Messages }}
     public struct {{ $name }} {
     {{- range $fields }}
-        public {{ .Type }}{{range loop .Dim }}[]{{end}} {{ .Name }};
+        public {{ findPrimitiveType .Type }}{{range loop .Dim }}[]{{end}} {{ .Name }};
     {{- end }}
     }
 {{- end }}

@@ -5,7 +5,7 @@ attributes:
   go:
     output: /home/nils/go/src/github.com/Oppodelldog/sbmf/example/go/messages.go
     package: data
-  version: 119
+  version: 121
 enums:
   TestEnum:
   - TestEnumValue1: 1
