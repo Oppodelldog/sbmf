@@ -29,10 +29,12 @@ const (
 
 type (
 // Types
-    MyString string
     MyBoolean bool
+    MyFloat32 float32
+    MyFloat64 float64
     MyInteger32 int32
     MyInteger64 int64
+    MyString string
 
 // Enums
     TestEnum int
@@ -41,6 +43,8 @@ type (
     Alias struct {
         MI32 MyInteger32
         MI64 MyInteger64
+        MF32 MyFloat32
+        MF64 MyFloat64
         MS MyString
         E TestEnum
         B MyBoolean
@@ -48,6 +52,8 @@ type (
     AliasLists struct {
         MI32 []MyInteger32
         MI64 []MyInteger64
+        MF32 []MyFloat32
+        MF64 []MyFloat64
         MS []MyString
         E []TestEnum
         B []MyBoolean
@@ -64,12 +70,16 @@ type (
     Primitive struct {
         I32 int32
         I64 int64
+        F32 float32
+        F64 float64
         S string
         B bool
     }
     PrimitiveLists struct {
         I32 []int32
         I64 []int64
+        F32 []float32
+        F64 []float64
         II32 [][]int32
         II64 [][]int64
         S []string
@@ -109,14 +119,6 @@ return unmarshalString(r, v)
     return nil
 
 // Types
-    case *MyString:
-    var t string
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return e
-    }
-    *v = MyString(t)
-    return nil
     case *MyBoolean:
     var t bool
     var e=unmarshal(&t,r)
@@ -124,6 +126,22 @@ return unmarshalString(r, v)
     return e
     }
     *v = MyBoolean(t)
+    return nil
+    case *MyFloat32:
+    var t float32
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return e
+    }
+    *v = MyFloat32(t)
+    return nil
+    case *MyFloat64:
+    var t float64
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return e
+    }
+    *v = MyFloat64(t)
     return nil
     case *MyInteger32:
     var t int32
@@ -141,9 +159,21 @@ return unmarshalString(r, v)
     }
     *v = MyInteger64(t)
     return nil
+    case *MyString:
+    var t string
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return e
+    }
+    *v = MyString(t)
+    return nil
 
 // ListTypes
     case *[]MyBoolean:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat32:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat64:
         return unmarshalSlice(r,v)
     case *[]MyInteger32:
         return unmarshalSlice(r,v)
@@ -154,6 +184,10 @@ return unmarshalString(r, v)
     case *[]TestEnum:
         return unmarshalSlice(r,v)
     case *[]bool:
+        return unmarshalSlice(r,v)
+    case *[]float32:
+        return unmarshalSlice(r,v)
+    case *[]float64:
         return unmarshalSlice(r,v)
     case *[]int32:
         return unmarshalSlice(r,v)
@@ -227,17 +261,25 @@ return marshalString(w, v)
     return binary.Write(w, binary.LittleEndian, int32(v))
 
 // Types
-    case MyString:
-    return marshal(string(v),w)
     case MyBoolean:
     return marshal(bool(v),w)
+    case MyFloat32:
+    return marshal(float32(v),w)
+    case MyFloat64:
+    return marshal(float64(v),w)
     case MyInteger32:
     return marshal(int32(v),w)
     case MyInteger64:
     return marshal(int64(v),w)
+    case MyString:
+    return marshal(string(v),w)
 
 // ListTypes
     case []MyBoolean:
+        return marshalSlice(w,v)
+    case []MyFloat32:
+        return marshalSlice(w,v)
+    case []MyFloat64:
         return marshalSlice(w,v)
     case []MyInteger32:
         return marshalSlice(w,v)
@@ -248,6 +290,10 @@ return marshalString(w, v)
     case []TestEnum:
         return marshalSlice(w,v)
     case []bool:
+        return marshalSlice(w,v)
+    case []float32:
+        return marshalSlice(w,v)
+    case []float64:
         return marshalSlice(w,v)
     case []int32:
         return marshalSlice(w,v)
@@ -276,6 +322,12 @@ return binary.Write(w, binary.LittleEndian, v)
         if e=unmarshal(&m.MI64, r); e != nil {
         return e
         }
+        if e=unmarshal(&m.MF32, r); e != nil {
+        return e
+        }
+        if e=unmarshal(&m.MF64, r); e != nil {
+        return e
+        }
         if e=unmarshal(&m.MS, r); e != nil {
         return e
         }
@@ -299,6 +351,12 @@ return binary.Write(w, binary.LittleEndian, v)
         if e=marshal(m.MI64,w); e != nil {
         return nil,e
         }
+        if e=marshal(m.MF32,w); e != nil {
+        return nil,e
+        }
+        if e=marshal(m.MF64,w); e != nil {
+        return nil,e
+        }
         if e=marshal(m.MS,w); e != nil {
         return nil,e
         }
@@ -317,6 +375,12 @@ return binary.Write(w, binary.LittleEndian, v)
         return e
         }
         if e=unmarshal(&m.MI64, r); e != nil {
+        return e
+        }
+        if e=unmarshal(&m.MF32, r); e != nil {
+        return e
+        }
+        if e=unmarshal(&m.MF64, r); e != nil {
         return e
         }
         if e=unmarshal(&m.MS, r); e != nil {
@@ -340,6 +404,12 @@ return binary.Write(w, binary.LittleEndian, v)
         return nil,e
         }
         if e=marshal(m.MI64,w); e != nil {
+        return nil,e
+        }
+        if e=marshal(m.MF32,w); e != nil {
+        return nil,e
+        }
+        if e=marshal(m.MF64,w); e != nil {
         return nil,e
         }
         if e=marshal(m.MS,w); e != nil {
@@ -418,6 +488,12 @@ return binary.Write(w, binary.LittleEndian, v)
         if e=unmarshal(&m.I64, r); e != nil {
         return e
         }
+        if e=unmarshal(&m.F32, r); e != nil {
+        return e
+        }
+        if e=unmarshal(&m.F64, r); e != nil {
+        return e
+        }
         if e=unmarshal(&m.S, r); e != nil {
         return e
         }
@@ -438,6 +514,12 @@ return binary.Write(w, binary.LittleEndian, v)
         if e=marshal(m.I64,w); e != nil {
         return nil,e
         }
+        if e=marshal(m.F32,w); e != nil {
+        return nil,e
+        }
+        if e=marshal(m.F64,w); e != nil {
+        return nil,e
+        }
         if e=marshal(m.S,w); e != nil {
         return nil,e
         }
@@ -453,6 +535,12 @@ return binary.Write(w, binary.LittleEndian, v)
         return e
         }
         if e=unmarshal(&m.I64, r); e != nil {
+        return e
+        }
+        if e=unmarshal(&m.F32, r); e != nil {
+        return e
+        }
+        if e=unmarshal(&m.F64, r); e != nil {
         return e
         }
         if e=unmarshal(&m.II32, r); e != nil {
@@ -482,6 +570,12 @@ return binary.Write(w, binary.LittleEndian, v)
         return nil,e
         }
         if e=marshal(m.I64,w); e != nil {
+        return nil,e
+        }
+        if e=marshal(m.F32,w); e != nil {
+        return nil,e
+        }
+        if e=marshal(m.F64,w); e != nil {
         return nil,e
         }
         if e=marshal(m.II32,w); e != nil {

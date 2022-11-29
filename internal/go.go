@@ -29,10 +29,10 @@ func goType(t string) string {
 		return "int32"
 	case "i64":
 		return "int64"
-		//case "f32":
-		//return "float32"
-		//case "f64":
-		//return "float64"
+	case "f32":
+		return "float32"
+	case "f64":
+		return "float64"
 	case "str":
 		return "string"
 	default:

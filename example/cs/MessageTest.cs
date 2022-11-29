@@ -16,8 +16,8 @@ namespace cs
             {
                 I32 = 1,
                 I64 = 2,
-                //F32 = 3.3f,
-                //F64 = 4.4f,
+                F32 = 3.3f,
+                F64 = 4.4f,
                 S = "hello",
                 B = true
             };
@@ -30,8 +30,8 @@ namespace cs
 
             Assert.AreEqual(p.I32, p2.I32);
             Assert.AreEqual(p.I64, p2.I64);
-            //Assert.AreEqual(p.F32, p2.F32);
-            //Assert.AreEqual(p.F64, p2.F64);
+            Assert.AreEqual(p.F32, p2.F32);
+            Assert.AreEqual(p.F64, p2.F64);
             Assert.AreEqual(p.S, p2.S);
             Assert.AreEqual(p.B, p2.B);
         }
@@ -45,8 +45,8 @@ namespace cs
                 I64 = new[] { 4L, 5L, 6L },
                 II32 = new[] { new[] { 7, 8, 9 }, new[] { 10, 11, 12 } },
                 II64 = new[] { new[] { 13L, 14L, 15L }, new[] { 16L, 17L, 18L } },
-                //F32 = new[] { 7.7f, 8.8f, 9.9f },
-                //F64 = new[] { 10.10d, 11.11d, 12.12d },
+                F32 = new[] {Single.MinValue, 0,0.11f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue },
+                F64 = new[] { Double.MinValue, 0,0.11d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue},
                 S = new[] { "hello", "world" },
                 S2 = new[] { new[] { "hello", "world" }, new[] { "you", "are", "wonderful" } },
                 B = new[] { true, false, true }
@@ -62,8 +62,8 @@ namespace cs
             Assert.AreEqual(p.I64, p2.I64);
             Assert.AreEqual(p.II32, p2.II32);
             Assert.AreEqual(p.II64, p2.II64);
-            //Assert.AreEqual(p.F32, p2.F32);
-            //Assert.AreEqual(p.F64, p2.F64);
+            Assert.AreEqual(p.F32, p2.F32);
+            Assert.AreEqual(p.F64, p2.F64);
             Assert.AreEqual(p.S, p2.S);
             Assert.AreEqual(p.S2, p2.S2);
             Assert.AreEqual(p.B, p2.B);
@@ -76,8 +76,8 @@ namespace cs
             {
                 MI32 = 1,
                 MI64 = 2,
-                //MF32 = 3.3f,
-                //MF64 = 4.4f,
+                MF32 = 3.3f,
+                MF64 = 4.4f,
                 MS = "hello",
                 E = TestEnum.TestEnumValue2,
                 B = true
@@ -91,8 +91,8 @@ namespace cs
 
             Assert.AreEqual(p.MI32, p2.MI32);
             Assert.AreEqual(p.MI64, p2.MI64);
-            //Assert.AreEqual(p.MF32, p2.MF32);
-            //Assert.AreEqual(p.MF64, p2.MF64);
+            Assert.AreEqual(p.MF32, p2.MF32);
+            Assert.AreEqual(p.MF64, p2.MF64);
             Assert.AreEqual(p.MS, p2.MS);
             Assert.AreEqual(p.E, p2.E);
             Assert.AreEqual(p.B, p2.B);
@@ -105,8 +105,8 @@ namespace cs
             {
                 MI32 = new[] { 1, 2, 3 },
                 MI64 = new[] { 4L, 5L, 6L },
-                //MF32 = new[] { 7.7f, 8.8f, 9.9f },
-                //MF64 = new[] { 10.10d, 11.11d, 12.12d },
+                MF32 = new[] { Single.MinValue, 0,0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Single.MaxValue },
+                MF64 = new[] { Double.MinValue, 0,0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Double.MaxValue },
                 MS = new[] { "hello", "world" },
                 E = new[] { TestEnum.TestEnumValue1, TestEnum.TestEnumValue2 },
                 B = new[] { true, false, true }
@@ -120,8 +120,8 @@ namespace cs
 
             Assert.AreEqual(p.MI32, p2.MI32);
             Assert.AreEqual(p.MI64, p2.MI64);
-            //Assert.AreEqual(p.MF32, p2.MF32);
-            //Assert.AreEqual(p.MF64, p2.MF64);
+            Assert.AreEqual(p.MF32, p2.MF32);
+            Assert.AreEqual(p.MF64, p2.MF64);
             Assert.AreEqual(p.MS, p2.MS);
             Assert.AreEqual(p.E, p2.E);
             Assert.AreEqual(p.B, p2.B);
@@ -136,8 +136,8 @@ namespace cs
                 {
                     I32 = new[] { 1, 2, 3 },
                     I64 = new[] { 4L, 5L, 6L },
-                    //F32 = new[] { 7.7f, 8.8f, 9.9f },
-                    //F64 = new[] { 10.1d, 11.1d, 12.1d },
+                    F32 = new[] { 7.7f, 8.8f, 9.9f },
+                    F64 = new[] { 10.1d, 11.1d, 12.1d },
                     S = new[] { "hello", "world" },
                     B = new[] { true, false, true }
                 },
@@ -145,8 +145,8 @@ namespace cs
                 {
                     I32 = 1,
                     I64 = 2,
-                    //F32 = 3.3f,
-                    //F64 = 4.4f,
+                    F32 = 3.3f,
+                    F64 = 4.4f,
                     S = "hello",
                     B = true
                 },
@@ -154,8 +154,8 @@ namespace cs
                 {
                     MI32 = 1,
                     MI64 = 2,
-                    //MF32 = 3.3f,
-                    //MF64 = 4.4f,
+                    MF32 = 3.3f,
+                    MF64 = 4.4f,
                     MS = "hello",
                     E = TestEnum.TestEnumValue2,
                     B = true
@@ -164,8 +164,8 @@ namespace cs
                 {
                     MI32 = new[] { 1, 2, 3 },
                     MI64 = new[] { 4L, 5L, 6L },
-                    //MF32 = new[] { 7.7f, 8.8f, 9.9f },
-                    //MF64 = new[] { 10.1d, 11.1d, 12.1d },
+                    MF32 = new[] { 7.7f, 8.8f, 9.9f },
+                    MF64 = new[] { 10.1d, 11.1d, 12.1d },
                     MS = new[] { "hello", "world" },
                     E = new[] { TestEnum.TestEnumValue1, TestEnum.TestEnumValue2 },
                     B = new[] { true, false, true }
@@ -181,31 +181,31 @@ namespace cs
             fb2.UnmarshalBinary(reader);
 
             Assert.AreEqual(fb.PL.B, fb2.PL.B);
-            //Assert.AreEqual(fb.PL.F32, fb2.PL.F32);
-            //Assert.AreEqual(fb.PL.F64, fb2.PL.F64);
+            Assert.AreEqual(fb.PL.F32, fb2.PL.F32);
+            Assert.AreEqual(fb.PL.F64, fb2.PL.F64);
             Assert.AreEqual(fb.PL.I32, fb2.PL.I32);
             Assert.AreEqual(fb.PL.I64, fb2.PL.I64);
             Assert.AreEqual(fb.PL.S, fb2.PL.S);
 
             Assert.AreEqual(fb.P.B, fb2.P.B);
-            //Assert.AreEqual(fb.P.F32, fb2.P.F32);
-            //Assert.AreEqual(fb.P.F64, fb2.P.F64);
+            Assert.AreEqual(fb.P.F32, fb2.P.F32);
+            Assert.AreEqual(fb.P.F64, fb2.P.F64);
             Assert.AreEqual(fb.P.I32, fb2.P.I32);
             Assert.AreEqual(fb.P.I64, fb2.P.I64);
             Assert.AreEqual(fb.P.S, fb2.P.S);
 
             Assert.AreEqual(fb.A.B, fb2.A.B);
             Assert.AreEqual(fb.A.E, fb2.A.E);
-            //Assert.AreEqual(fb.A.MF32, fb2.A.MF32);
-            //Assert.AreEqual(fb.A.MF64, fb2.A.MF64);
+            Assert.AreEqual(fb.A.MF32, fb2.A.MF32);
+            Assert.AreEqual(fb.A.MF64, fb2.A.MF64);
             Assert.AreEqual(fb.A.MI32, fb2.A.MI32);
             Assert.AreEqual(fb.A.MI64, fb2.A.MI64);
             Assert.AreEqual(fb.A.MS, fb2.A.MS);
 
             Assert.AreEqual(fb.AL.B, fb2.AL.B);
             Assert.AreEqual(fb.AL.E, fb2.AL.E);
-            //Assert.AreEqual(fb.AL.MF32, fb2.AL.MF32);
-            //Assert.AreEqual(fb.AL.MF64, fb2.AL.MF64);
+            Assert.AreEqual(fb.AL.MF32, fb2.AL.MF32);
+            Assert.AreEqual(fb.AL.MF64, fb2.AL.MF64);
             Assert.AreEqual(fb.AL.MI32, fb2.AL.MI32);
             Assert.AreEqual(fb.AL.MI64, fb2.AL.MI64);
             Assert.AreEqual(fb.AL.MS, fb2.AL.MS);
@@ -221,8 +221,8 @@ namespace cs
 
             Assert.AreEqual(1, p.I32);
             Assert.AreEqual(2, p.I64);
-            //Assert.AreEqual(3.3f, p.F32);
-            //Assert.AreEqual(4.4d, p.F64);
+            Assert.AreEqual(3.3f, p.F32);
+            Assert.AreEqual(4.4d, p.F64);
             Assert.AreEqual("hello", p.S);
             Assert.AreEqual(true, p.B);
         }
@@ -237,8 +237,8 @@ namespace cs
 
             Assert.AreEqual(1, p.MI32);
             Assert.AreEqual(2, p.MI64);
-            //Assert.AreEqual(3.3f, p.MF32);
-            //Assert.AreEqual(4.4d, p.MF64);
+            Assert.AreEqual(3.3f, p.MF32);
+            Assert.AreEqual(4.4d, p.MF64);
             Assert.AreEqual("hello", p.MS);
             Assert.AreEqual(TestEnum.TestEnumValue2, p.E);
             Assert.AreEqual(true, p.B);
@@ -255,9 +255,9 @@ namespace cs
             Assert.AreEqual(new[] { Int32.MinValue, 0, Int32.MaxValue }, p.I32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.I64);
             Assert.AreEqual(new[] { new[] { Int32.MinValue }, new[] { 42, Int32.MaxValue } }, p.II32);
-            Assert.AreEqual(new[] { new[] { Int64.MinValue }, new[] { 42, Int64.MaxValue} }, p.II64);
-            //Assert.AreEqual(new[] { Single.MinValue, 0, Single.MaxValue }, p.F32);
-            //Assert.AreEqual(new[] { Double.MinValue, 0, Double.MaxValue, }, p.F64);
+            Assert.AreEqual(new[] { new[] { Int64.MinValue }, new[] { 42, Int64.MaxValue } }, p.II64);
+            Assert.AreEqual(new[] { Single.MinValue, 0,0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Single.MaxValue  }, p.F32);
+            Assert.AreEqual(new[] { Double.MinValue, 0,0.6d, 0.7d, 0.8d, 0.9d, 1.0d, Double.MaxValue }, p.F64);
             Assert.AreEqual(new[] { "hello", "world" }, p.S);
             Assert.AreEqual(new[] { new[] { "hello", "world" }, new[] { "you", "are", "wonderful" } }, p.S2);
             Assert.AreEqual(new[] { true, false }, p.B);
@@ -273,8 +273,8 @@ namespace cs
 
             Assert.AreEqual(new[] { Int32.MinValue, 0, Int32.MaxValue }, p.MI32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.MI64);
-            //Assert.AreEqual(new[] { Single.MinValue, 0, Single.MaxValue }, p.MF32);
-            //Assert.AreEqual(new[] { Double.MinValue, 0, Double.MaxValue, }, p.MF64);
+            Assert.AreEqual(new[] {Single.MinValue, 0,0.11f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue }, p.MF32);
+            Assert.AreEqual(new[] { Double.MinValue, 0,0.11d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue  }, p.MF64);
             Assert.AreEqual(new[] { "hello", "world" }, p.MS);
             Assert.AreEqual(new[] { TestEnum.TestEnumValue1, TestEnum.TestEnumValue2 }, p.E);
             Assert.AreEqual(new[] { true, false }, p.B);
@@ -290,30 +290,30 @@ namespace cs
 
             Assert.AreEqual(1, p.P.I32);
             Assert.AreEqual(2, p.P.I64);
-            //Assert.AreEqual(3.3f, p.P.F32);
-            //Assert.AreEqual(4.4d, p.P.F64);
+            Assert.AreEqual(3.3f, p.P.F32);
+            Assert.AreEqual(4.4d, p.P.F64);
             Assert.AreEqual("hello", p.P.S);
             Assert.AreEqual(true, p.P.B);
 
             Assert.AreEqual(new[] { Int32.MinValue, 0, Int32.MaxValue }, p.PL.I32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.PL.I64);
-            //Assert.AreEqual(new[] { Single.MinValue, 0, Single.MaxValue }, p.PL.F32);
-            //Assert.AreEqual(new[] { Double.MinValue, 0, Double.MaxValue, }, p.PL.F64);
+            Assert.AreEqual(new[] {  Single.MinValue, 0,0.678912345f, 0.77f, 0.88f, 0.99f, 1.1f, Single.MaxValue }, p.PL.F32);
+            Assert.AreEqual(new[] { Double.MinValue, 0,0.678912345d, 0.77d, 0.88d, 0.99d, 1.1d, Double.MaxValue }, p.PL.F64);
             Assert.AreEqual(new[] { "hello", "world" }, p.PL.S);
             Assert.AreEqual(new[] { true, false }, p.PL.B);
 
             Assert.AreEqual(1, p.A.MI32);
             Assert.AreEqual(2, p.A.MI64);
-            //Assert.AreEqual(3.3f, p.A.MF32);
-            //Assert.AreEqual(4.4d, p.A.MF64);
+            Assert.AreEqual(3.3f, p.A.MF32);
+            Assert.AreEqual(4.4d, p.A.MF64);
             Assert.AreEqual("hello", p.A.MS);
             Assert.AreEqual(TestEnum.TestEnumValue2, p.A.E);
             Assert.AreEqual(true, p.A.B);
 
             Assert.AreEqual(new[] { Int32.MinValue, 0, Int32.MaxValue }, p.AL.MI32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.AL.MI64);
-            //Assert.AreEqual(new[] { Single.MinValue, 0, Single.MaxValue }, p.AL.MF32);
-            //Assert.AreEqual(new[] { Double.MinValue, 0, Double.MaxValue, }, p.AL.MF64);
+            Assert.AreEqual(new[] { Single.MinValue, 0,0.111111111112f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue}, p.AL.MF32);
+            Assert.AreEqual(new[] { Double.MinValue, 0,0.111111111112d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue }, p.AL.MF64);
             Assert.AreEqual(new[] { "hello", "world" }, p.AL.MS);
             Assert.AreEqual(new[] { TestEnum.TestEnumValue1, TestEnum.TestEnumValue2 }, p.AL.E);
             Assert.AreEqual(new[] { true, false }, p.AL.B);

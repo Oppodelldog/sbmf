@@ -5,7 +5,7 @@ attributes:
   go:
     output: /home/nils/go/src/github.com/Oppodelldog/sbmf/example/go/messages.go
     package: data
-  version: 121
+  version: 132
 enums:
   TestEnum:
   - TestEnumValue1: 1
@@ -14,11 +14,15 @@ messages:
 - Primitive:
   - I32: i32
   - I64: i64
+  - F32: f32
+  - F64: f64
   - S: str
   - B: bool
 - PrimitiveLists:
   - I32: <i32>
   - I64: <i64>
+  - F32: <f32>
+  - F64: <f64>
   - II32: <<i32>>
   - II64: <<i64>>
   - S: <str>
@@ -27,12 +31,16 @@ messages:
 - Alias:
   - MI32: MyInteger32
   - MI64: MyInteger64
+  - MF32: MyFloat32
+  - MF64: MyFloat64
   - MS: MyString
   - E: TestEnum
   - B: MyBoolean
 - AliasLists:
   - MI32: <MyInteger32>
   - MI64: <MyInteger64>
+  - MF32: <MyFloat32>
+  - MF64: <MyFloat64>
   - MS: <MyString>
   - E: <TestEnum>
   - B: <MyBoolean>
@@ -45,6 +53,8 @@ messages:
   - S: string
 types:
   MyBoolean: bool
+  MyFloat32: f32
+  MyFloat64: f64
   MyInteger32: i32
   MyInteger64: i64
   MyString: str
