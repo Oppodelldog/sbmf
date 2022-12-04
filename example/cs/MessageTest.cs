@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Messages;
 using Messages.Extensions;
@@ -45,8 +46,8 @@ namespace cs
                 I64 = new[] { 4L, 5L, 6L },
                 II32 = new[] { new[] { 7, 8, 9 }, new[] { 10, 11, 12 } },
                 II64 = new[] { new[] { 13L, 14L, 15L }, new[] { 16L, 17L, 18L } },
-                F32 = new[] {Single.MinValue, 0,0.11f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue },
-                F64 = new[] { Double.MinValue, 0,0.11d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue},
+                F32 = new[] { Single.MinValue, 0, 0.11f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue },
+                F64 = new[] { Double.MinValue, 0, 0.11d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue },
                 S = new[] { "hello", "world" },
                 S2 = new[] { new[] { "hello", "world" }, new[] { "you", "are", "wonderful" } },
                 B = new[] { true, false, true }
@@ -105,8 +106,8 @@ namespace cs
             {
                 MI32 = new[] { (MyInteger32)1, (MyInteger32)2, (MyInteger32)3 },
                 MI64 = new[] { 4L, 5L, 6L },
-                MF32 = new[] { Single.MinValue, 0,0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Single.MaxValue },
-                MF64 = new[] { Double.MinValue, 0,0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Double.MaxValue },
+                MF32 = new[] { Single.MinValue, 0, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Single.MaxValue },
+                MF64 = new[] { Double.MinValue, 0, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Double.MaxValue },
                 MS = new[] { "hello", "world" },
                 E = new[] { TestEnum.Value1, TestEnum.Value2 },
                 B = new[] { true, false, true }
@@ -256,8 +257,8 @@ namespace cs
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.I64);
             Assert.AreEqual(new[] { new[] { Int32.MinValue }, new[] { 42, Int32.MaxValue } }, p.II32);
             Assert.AreEqual(new[] { new[] { Int64.MinValue }, new[] { 42, Int64.MaxValue } }, p.II64);
-            Assert.AreEqual(new[] { Single.MinValue, 0,0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Single.MaxValue  }, p.F32);
-            Assert.AreEqual(new[] { Double.MinValue, 0,0.6d, 0.7d, 0.8d, 0.9d, 1.0d, Double.MaxValue }, p.F64);
+            Assert.AreEqual(new[] { Single.MinValue, 0, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Single.MaxValue }, p.F32);
+            Assert.AreEqual(new[] { Double.MinValue, 0, 0.6d, 0.7d, 0.8d, 0.9d, 1.0d, Double.MaxValue }, p.F64);
             Assert.AreEqual(new[] { "hello", "world" }, p.S);
             Assert.AreEqual(new[] { new[] { "hello", "world" }, new[] { "you", "are", "wonderful" } }, p.S2);
             Assert.AreEqual(new[] { true, false }, p.B);
@@ -273,8 +274,8 @@ namespace cs
 
             Assert.AreEqual(new[] { (MyInteger32)Int32.MinValue, (MyInteger32)0, (MyInteger32)Int32.MaxValue }, p.MI32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.MI64);
-            Assert.AreEqual(new[] {Single.MinValue, 0,0.11f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue }, p.MF32);
-            Assert.AreEqual(new[] { Double.MinValue, 0,0.11d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue  }, p.MF64);
+            Assert.AreEqual(new[] { Single.MinValue, 0, 0.11f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue }, p.MF32);
+            Assert.AreEqual(new[] { Double.MinValue, 0, 0.11d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue }, p.MF64);
             Assert.AreEqual(new[] { "hello", "world" }, p.MS);
             Assert.AreEqual(new[] { TestEnum.Value1, TestEnum.Value2 }, p.E);
             Assert.AreEqual(new[] { true, false }, p.B);
@@ -297,8 +298,8 @@ namespace cs
 
             Assert.AreEqual(new[] { Int32.MinValue, 0, Int32.MaxValue }, p.PL.I32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.PL.I64);
-            Assert.AreEqual(new[] {  Single.MinValue, 0,0.678912345f, 0.77f, 0.88f, 0.99f, 1.1f, Single.MaxValue }, p.PL.F32);
-            Assert.AreEqual(new[] { Double.MinValue, 0,0.678912345d, 0.77d, 0.88d, 0.99d, 1.1d, Double.MaxValue }, p.PL.F64);
+            Assert.AreEqual(new[] { Single.MinValue, 0, 0.678912345f, 0.77f, 0.88f, 0.99f, 1.1f, Single.MaxValue }, p.PL.F32);
+            Assert.AreEqual(new[] { Double.MinValue, 0, 0.678912345d, 0.77d, 0.88d, 0.99d, 1.1d, Double.MaxValue }, p.PL.F64);
             Assert.AreEqual(new[] { "hello", "world" }, p.PL.S);
             Assert.AreEqual(new[] { true, false }, p.PL.B);
 
@@ -312,8 +313,8 @@ namespace cs
 
             Assert.AreEqual(new[] { (MyInteger32)Int32.MinValue, (MyInteger32)0, (MyInteger32)Int32.MaxValue }, p.AL.MI32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.AL.MI64);
-            Assert.AreEqual(new[] { Single.MinValue, 0,0.111111111112f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue}, p.AL.MF32);
-            Assert.AreEqual(new[] { Double.MinValue, 0,0.111111111112d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue }, p.AL.MF64);
+            Assert.AreEqual(new[] { Single.MinValue, 0, 0.111111111112f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue }, p.AL.MF32);
+            Assert.AreEqual(new[] { Double.MinValue, 0, 0.111111111112d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue }, p.AL.MF64);
             Assert.AreEqual(new[] { "hello", "world" }, p.AL.MS);
             Assert.AreEqual(new[] { TestEnum.Value1, TestEnum.Value2 }, p.AL.E);
             Assert.AreEqual(new[] { true, false }, p.AL.B);
@@ -346,17 +347,35 @@ namespace cs
         [Test]
         public void TestPacketReader()
         {
-            var buffer = new MemoryStream();
-            var fileBytes = File.ReadAllBytes("../../../out-one-field.bin");
-            var binaryWriter = new BinaryWriter(buffer);
-            binaryWriter.Write(fileBytes.Length);
-            binaryWriter.Write(fileBytes);
+            var fileBytes = File.ReadAllBytes("../../../out-2packets-one-field.bin");
+            var reader = new MemoryStream(fileBytes);
 
             var pr = new PacketReader();
 
-            var m = pr.Read(buffer.ToArray());
+            var messages = new List<object>();
+            foreach (var b in fileBytes)
+            {
+                var m = pr.Read(new[] { b });
+                if (m != null)
+                {
+                    messages.Add(m);
+                }
+            }
 
-            Assert.AreEqual("hello-world", ((OneField)m).S);
+            Assert.AreEqual(2, messages.Count);
+            Assert.AreEqual("hello", ((OneField)messages[0]).S);
+            Assert.AreEqual("world", ((OneField)messages[1]).S);
+        }
+
+        [Test]
+        public void TestWritePackets()
+        {
+            var m1 = new OneField() { S = "hello" };
+            var m2 = new OneField() { S = "world" };
+            var writer = new BinaryWriter(new FileStream("../../../out-2packets-one-field.bin", FileMode.Create));
+            BinaryExtensions.WritePacket(writer, m1);
+            BinaryExtensions.WritePacket(writer, m2);
+            writer.Close();
         }
     }
 }

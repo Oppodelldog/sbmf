@@ -434,6 +434,56 @@ func TestWritePacket(t *testing.T) {
 	}
 }
 
+func TestWritePackets(t *testing.T) {
+	f, err := os.Create("out-2packets-one-field.bin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	err = WritePacket(f, OneField{S: "hello"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = WritePacket(f, OneField{S: "world"})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestReadPackets(t *testing.T) {
+	f, err := os.Open("out-2packets-one-field.bin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	o, err := ReadPacket(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	oneField, ok := o.(OneField)
+	if !ok {
+		t.Fatal("expected OneField")
+	}
+
+	assertEquals(t, oneField.S, "hello")
+
+	o, err = ReadPacket(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	oneField, ok = o.(OneField)
+	if !ok {
+		t.Fatal("expected OneField")
+	}
+
+	assertEquals(t, oneField.S, "world")
+}
+
 func TestPacketReader_Read(t *testing.T) {
 	var (
 		buffer = bytes.NewBuffer([]byte{})

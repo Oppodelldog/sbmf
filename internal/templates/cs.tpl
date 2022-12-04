@@ -261,10 +261,9 @@ public class PacketReader
 {
     private readonly MemoryStream _buffer = new MemoryStream();
     private int _nextPacketSize = 0;
-
     public object Read(byte[] data)
     {
-        _buffer.Write(data, 0, data.Length);
+        _buffer.Write(data,0,data.Length);
 
         if (_nextPacketSize == 0 && _buffer.Length >= 4)
         {
@@ -272,15 +271,27 @@ public class PacketReader
             _nextPacketSize = new BinaryReader(_buffer).ReadInt32();
         }
 
-        if (_nextPacketSize > 0 && _buffer.Length >= _nextPacketSize)
+        if (_nextPacketSize > 0 && _buffer.Length-4 >= _nextPacketSize)
         {
+            _buffer.Position = 4;
             var result = BinaryExtensions.ReadMessage(new BinaryReader(_buffer));
             _nextPacketSize = 0;
 
-            return result;
+            if (_buffer.Length > 0)
+            {
+            var pos = (int)_buffer.Position;
+            var cutlen = (int)_buffer.Length-pos;
+            var tmp = new byte[cutlen];
+            _buffer.Read(tmp, 0, cutlen);
+            _buffer.SetLength(0);
+            _buffer.Write(tmp, 0, cutlen);
+            _buffer.Position = 0;
         }
 
-        return null;
+        return result;
     }
+
+    return null;
+}
 }
 }
