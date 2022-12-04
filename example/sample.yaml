@@ -5,11 +5,14 @@ attributes:
   go:
     output: /home/nils/go/src/github.com/Oppodelldog/sbmf/example/go/messages.go
     package: data
-  version: 132
+  version: 144
 enums:
+  MyInteger32:
+  - Value1: 1
+  - Value2: 2
   TestEnum:
-  - TestEnumValue1: 1
-  - TestEnumValue2: 2
+  - Value1: 1
+  - Value2: 2
 messages:
 - Primitive:
   - I32: i32

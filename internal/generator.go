@@ -16,7 +16,7 @@ type typeMapper func(t string) string
 type findAliasTypeFunc func(t string) string
 type isEnumFunc func(t string) bool
 type isMessageFunc func(t string) bool
-type templateProvider func(findAliasTypeFunc, isEnumFunc, isMessageFunc) (*template.Template, error)
+type templateProvider func(generator *Generator) (*template.Template, error)
 
 type Generator struct {
 	Version int
@@ -57,7 +57,7 @@ func (g *Generator) AddMessage(name MessageName, fields []FieldDef) {
 }
 
 func (g *Generator) Generate() string {
-	t, err := g.ProvideTemplate(g.findAliasType, g.isEnum, g.isMessage)
+	t, err := g.ProvideTemplate(g)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -143,6 +143,16 @@ func (g *Generator) CreateMessageIDs() {
 	for _, name := range messageNames {
 		g.MessageIDs[MessageName(name)] = len(g.MessageIDs) + 1
 	}
+}
+
+func (g *Generator) hasType(s string) bool {
+	for _, t := range g.Types {
+		if t.Name == s {
+			return true
+		}
+	}
+
+	return false
 }
 
 type EnumName string

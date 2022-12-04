@@ -6,14 +6,20 @@ using System.IO;
 
 namespace Messages
 {
+    public enum MyInteger32 {
+
+        Value1 = 1,
+
+        Value2 = 2,
+    }
     public enum TestEnum {
 
-        TestEnumValue1 = 1,
+        Value1 = 1,
 
-        TestEnumValue2 = 2,
+        Value2 = 2,
     }
     public struct Alias {
-        public int MI32;
+        public MyInteger32 MI32;
         public long MI64;
         public float MF32;
         public double MF64;
@@ -22,7 +28,7 @@ namespace Messages
         public System.Boolean B;
     }
     public struct AliasLists {
-        public int[] MI32;
+        public MyInteger32[] MI32;
         public long[] MI64;
         public float[] MF32;
         public double[] MF64;
@@ -68,7 +74,7 @@ namespace Messages.Extensions
         {
             MemoryStream ms = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(ms);
-            writer.Write(o.MI32);
+            writer.Write((int)o.MI32);
             writer.Write(o.MI64);
             writer.Write(o.MF32);
             writer.Write(o.MF64);
@@ -82,7 +88,7 @@ namespace Messages.Extensions
 
         public static void UnmarshalBinary(ref this Alias o,BinaryReader reader)
         {
-            o.MI32 = reader.ReadInt32();
+            o.MI32 = (MyInteger32)reader.ReadInt32();
             o.MI64 = reader.ReadInt64();
             o.MF32 = reader.ReadSingle();
             o.MF64 = reader.ReadDouble();
@@ -108,7 +114,7 @@ namespace Messages.Extensions
 
         public static void UnmarshalBinary(ref this AliasLists o,BinaryReader reader)
         {
-                o.MI32 = reader.ReadList<int>();
+                o.MI32 = reader.ReadList<MyInteger32>();
                 o.MI64 = reader.ReadList<long>();
                 o.MF32 = reader.ReadList<float>();
                 o.MF64 = reader.ReadList<double>();
@@ -242,6 +248,10 @@ namespace Messages.Extensions
             {
                 writer.Write((bool)item);
             }
+            else if(item is MyInteger32)
+            {
+                writer.Write((int)item);
+            }
             else if(item is TestEnum)
             {
                 writer.Write((int)item);
@@ -288,6 +298,10 @@ namespace Messages.Extensions
             else if (typeof(T) == typeof(bool))
             {
                 result[i] = (T)(object)reader.ReadBoolean();
+            }
+            else if (typeof(T) == typeof(MyInteger32))
+            {
+                result[i] = (T)(object)reader.ReadInt32();
             }
             else if (typeof(T) == typeof(TestEnum))
             {
@@ -399,6 +413,15 @@ namespace Messages.Extensions
             default:
                 throw new Exception("Unknown message id " + messageId);
         }
+    }
+
+    public static void WritePacket(BinaryWriter writer, object message)
+    {
+        var ms = new MemoryStream();
+        var bw = new BinaryWriter(ms);
+        WriteMessage(bw, message);
+        writer.Write((int)ms.Length);
+        writer.Write(ms.ToArray());
     }
 }
 

@@ -23,21 +23,23 @@ const (
 )
 const (
 // Enums
-        TestEnumTestEnumValue1 TestEnum = 1
-        TestEnumTestEnumValue2 TestEnum = 2
+        MyInteger32Value1 MyInteger32 = 1
+        MyInteger32Value2 MyInteger32 = 2
+        TestEnumValue1 TestEnum = 1
+        TestEnumValue2 TestEnum = 2
 )
 
 type (
 // Types
-    MyBoolean bool
     MyFloat32 float32
     MyFloat64 float64
     MyInteger32 int32
     MyInteger64 int64
     MyString string
+    MyBoolean bool
 
 // Enums
-    TestEnum int
+        TestEnum int32
 
 // Messages
     Alias struct {
@@ -119,14 +121,6 @@ return unmarshalString(r, v)
     return nil
 
 // Types
-    case *MyBoolean:
-    var t bool
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return e
-    }
-    *v = MyBoolean(t)
-    return nil
     case *MyFloat32:
     var t float32
     var e=unmarshal(&t,r)
@@ -166,6 +160,14 @@ return unmarshalString(r, v)
     return e
     }
     *v = MyString(t)
+    return nil
+    case *MyBoolean:
+    var t bool
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return e
+    }
+    *v = MyBoolean(t)
     return nil
 
 // ListTypes
@@ -261,8 +263,6 @@ return marshalString(w, v)
     return binary.Write(w, binary.LittleEndian, int32(v))
 
 // Types
-    case MyBoolean:
-    return marshal(bool(v),w)
     case MyFloat32:
     return marshal(float32(v),w)
     case MyFloat64:
@@ -273,6 +273,8 @@ return marshalString(w, v)
     return marshal(int64(v),w)
     case MyString:
     return marshal(string(v),w)
+    case MyBoolean:
+    return marshal(bool(v),w)
 
 // ListTypes
     case []MyBoolean:
@@ -798,12 +800,12 @@ func (pr *PacketReader) Read(r io.Reader) (interface{}, error) {
     }
 
     if pr.nextPacketLength > 0 && int32(pr.Len()) >= pr.nextPacketLength {
-        var data = make([]byte, pr.nextPacketLength)
-        if e := binary.Read(&pr.Buffer, binary.LittleEndian, &data); e != nil {
+        var messageData = make([]byte, pr.nextPacketLength)
+        if e := binary.Read(&pr.Buffer, binary.LittleEndian, &messageData); e != nil {
             return nil, e
         }
         pr.nextPacketLength = 0
-        return ReadMessage(bytes.NewReader(data))
+        return ReadMessage(bytes.NewReader(messageData))
     }
 
     return nil, nil

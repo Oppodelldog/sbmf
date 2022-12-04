@@ -35,7 +35,9 @@ type (
 
 // Enums
 {{- range $name, $values := .Enums }}
-    {{ $name }} int
+    {{- if typeDoesNotExist $name }}
+        {{ $name }} int32
+    {{- end }}
 {{- end }}
 
 // Messages
@@ -61,6 +63,7 @@ return unmarshalString(r, v)
 
 // Enums
 {{- range $name, $values := .Enums }}
+{{- if typeDoesNotExist $name }}
     case *{{$name}}:
     var i int32
     e := binary.Read(r, binary.LittleEndian, &i)
@@ -70,6 +73,7 @@ return unmarshalString(r, v)
     *v = {{$name}}(i)
 
     return nil
+{{- end }}
 {{- end }}
 
 // Types
@@ -115,8 +119,10 @@ return marshalString(w, v)
 
 // Enums
 {{- range $name, $values := .Enums }}
+{{- if typeDoesNotExist $name }}
     case {{ $name }}:
     return binary.Write(w, binary.LittleEndian, int32(v))
+{{- end }}
 {{- end }}
 
 // Types
@@ -332,12 +338,12 @@ func (pr *PacketReader) Read(r io.Reader) (interface{}, error) {
     }
 
     if pr.nextPacketLength > 0 && int32(pr.Len()) >= pr.nextPacketLength {
-        var data = make([]byte, pr.nextPacketLength)
-        if e := binary.Read(&pr.Buffer, binary.LittleEndian, &data); e != nil {
+        var messageData = make([]byte, pr.nextPacketLength)
+        if e := binary.Read(&pr.Buffer, binary.LittleEndian, &messageData); e != nil {
             return nil, e
         }
         pr.nextPacketLength = 0
-        return ReadMessage(bytes.NewReader(data))
+        return ReadMessage(bytes.NewReader(messageData))
     }
 
     return nil, nil

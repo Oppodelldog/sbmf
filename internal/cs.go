@@ -95,33 +95,33 @@ func csTypeToBinaryReadFuncName(t string) string {
 	}
 }
 
-func csharpTemplate(findAliasType findAliasTypeFunc, isEnum isEnumFunc, isMessage isMessageFunc) (*template.Template, error) {
+func csharpTemplate(g *Generator) (*template.Template, error) {
 	t := template.New("cs-generator")
 
 	t.Funcs(template.FuncMap{
 		"readFunc": func(t string) string {
-			t1 := findAliasType(t)
+			t1 := g.findAliasType(t)
 			t2 := csType(t1)
 			t3 := csTypeToBinaryReadFuncName(t2)
 
 			return t3
 		},
 		"isString": func(t string) bool {
-			t = findPrimitiveType(findAliasType)(t)
+			t = findPrimitiveType(g.findAliasType)(t)
 			return t == "string"
 		},
 		"isStringList": func(t string, dim int) bool {
-			tPrimitive := findPrimitiveType(findAliasType)(t)
+			tPrimitive := findPrimitiveType(g.findAliasType)(t)
 			return tPrimitive == "string" && dim >= 1
 		},
 		"isPrimitive": func(t string) bool {
-			t = findAliasType(t)
+			t = g.findAliasType(t)
 			return csTypeToBinaryReadFuncName(t) != ""
 		},
 		"isList":            func(i int) bool { return i >= 1 },
-		"isEnum":            isEnum,
-		"isMessage":         isMessage,
-		"findPrimitiveType": findPrimitiveType(findAliasType),
+		"isEnum":            g.isEnum,
+		"isMessage":         g.isMessage,
+		"findPrimitiveType": findPrimitiveType(g.findAliasType),
 		"loop": func(n int) []int {
 			a := make([]int, n)
 			for i := range a {

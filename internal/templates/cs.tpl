@@ -17,7 +17,11 @@ namespace {{ .Namespace }}
 {{- range $name, $fields := .Messages }}
     public struct {{ $name }} {
     {{- range $fields }}
+        {{- if isEnum .Type }}
+        public {{ .Type }}{{range loop .Dim }}[]{{end}} {{ .Name }};
+        {{- else }}
         public {{ findPrimitiveType .Type }}{{range loop .Dim }}[]{{end}} {{ .Name }};
+        {{- end }}
     {{- end }}
     }
 {{- end }}
@@ -62,7 +66,11 @@ namespace {{ .Namespace }}.Extensions
             {{- else if isString .Type }}
             o.{{ .Name }} = ReadString(reader);
             {{- else if isList .Dim }}
+                {{- if isEnum .Type }}
+                o.{{ .Name }} = reader.ReadList<{{ .Type }}{{range loopless .Dim }}[]{{end}}>();
+                {{- else }}
                 o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}{{range loopless .Dim }}[]{{end}}>();
+                {{- end }}
             {{- else if isPrimitive .Type }}
             o.{{ .Name }} = reader.{{ readFunc .Type }}();
             {{- else if isEnum .Type }}
@@ -236,6 +244,15 @@ namespace {{ .Namespace }}.Extensions
             default:
                 throw new Exception("Unknown message id " + messageId);
         }
+    }
+
+    public static void WritePacket(BinaryWriter writer, object message)
+    {
+        var ms = new MemoryStream();
+        var bw = new BinaryWriter(ms);
+        WriteMessage(bw, message);
+        writer.Write((int)ms.Length);
+        writer.Write(ms.ToArray());
     }
 }
 

@@ -74,12 +74,12 @@ namespace cs
         {
             var p = new Alias
             {
-                MI32 = 1,
+                MI32 = MyInteger32.Value1,
                 MI64 = 2,
                 MF32 = 3.3f,
                 MF64 = 4.4f,
                 MS = "hello",
-                E = TestEnum.TestEnumValue2,
+                E = TestEnum.Value2,
                 B = true
             };
 
@@ -103,12 +103,12 @@ namespace cs
         {
             var p = new AliasLists
             {
-                MI32 = new[] { 1, 2, 3 },
+                MI32 = new[] { (MyInteger32)1, (MyInteger32)2, (MyInteger32)3 },
                 MI64 = new[] { 4L, 5L, 6L },
                 MF32 = new[] { Single.MinValue, 0,0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Single.MaxValue },
                 MF64 = new[] { Double.MinValue, 0,0.6f, 0.7f, 0.8f, 0.9f, 1.0f, Double.MaxValue },
                 MS = new[] { "hello", "world" },
-                E = new[] { TestEnum.TestEnumValue1, TestEnum.TestEnumValue2 },
+                E = new[] { TestEnum.Value1, TestEnum.Value2 },
                 B = new[] { true, false, true }
             };
 
@@ -152,22 +152,22 @@ namespace cs
                 },
                 A = new Alias()
                 {
-                    MI32 = 1,
+                    MI32 = MyInteger32.Value1,
                     MI64 = 2,
                     MF32 = 3.3f,
                     MF64 = 4.4f,
                     MS = "hello",
-                    E = TestEnum.TestEnumValue2,
+                    E = TestEnum.Value2,
                     B = true
                 },
                 AL = new AliasLists()
                 {
-                    MI32 = new[] { 1, 2, 3 },
+                    MI32 = new[] { (MyInteger32)1, (MyInteger32)2, (MyInteger32)3 },
                     MI64 = new[] { 4L, 5L, 6L },
                     MF32 = new[] { 7.7f, 8.8f, 9.9f },
                     MF64 = new[] { 10.1d, 11.1d, 12.1d },
                     MS = new[] { "hello", "world" },
-                    E = new[] { TestEnum.TestEnumValue1, TestEnum.TestEnumValue2 },
+                    E = new[] { TestEnum.Value1, TestEnum.Value2 },
                     B = new[] { true, false, true }
                 },
             };
@@ -235,12 +235,12 @@ namespace cs
             var p = new Alias();
             p.UnmarshalBinary(reader);
 
-            Assert.AreEqual(1, p.MI32);
+            Assert.AreEqual((MyInteger32)1, p.MI32);
             Assert.AreEqual(2, p.MI64);
             Assert.AreEqual(3.3f, p.MF32);
             Assert.AreEqual(4.4d, p.MF64);
             Assert.AreEqual("hello", p.MS);
-            Assert.AreEqual(TestEnum.TestEnumValue2, p.E);
+            Assert.AreEqual(TestEnum.Value2, p.E);
             Assert.AreEqual(true, p.B);
         }
 
@@ -271,12 +271,12 @@ namespace cs
             var p = new AliasLists();
             p.UnmarshalBinary(reader);
 
-            Assert.AreEqual(new[] { Int32.MinValue, 0, Int32.MaxValue }, p.MI32);
+            Assert.AreEqual(new[] { (MyInteger32)Int32.MinValue, (MyInteger32)0, (MyInteger32)Int32.MaxValue }, p.MI32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.MI64);
             Assert.AreEqual(new[] {Single.MinValue, 0,0.11f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue }, p.MF32);
             Assert.AreEqual(new[] { Double.MinValue, 0,0.11d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue  }, p.MF64);
             Assert.AreEqual(new[] { "hello", "world" }, p.MS);
-            Assert.AreEqual(new[] { TestEnum.TestEnumValue1, TestEnum.TestEnumValue2 }, p.E);
+            Assert.AreEqual(new[] { TestEnum.Value1, TestEnum.Value2 }, p.E);
             Assert.AreEqual(new[] { true, false }, p.B);
         }
 
@@ -302,20 +302,20 @@ namespace cs
             Assert.AreEqual(new[] { "hello", "world" }, p.PL.S);
             Assert.AreEqual(new[] { true, false }, p.PL.B);
 
-            Assert.AreEqual(1, p.A.MI32);
+            Assert.AreEqual((MyInteger32)1, p.A.MI32);
             Assert.AreEqual(2, p.A.MI64);
             Assert.AreEqual(3.3f, p.A.MF32);
             Assert.AreEqual(4.4d, p.A.MF64);
             Assert.AreEqual("hello", p.A.MS);
-            Assert.AreEqual(TestEnum.TestEnumValue2, p.A.E);
+            Assert.AreEqual(TestEnum.Value2, p.A.E);
             Assert.AreEqual(true, p.A.B);
 
-            Assert.AreEqual(new[] { Int32.MinValue, 0, Int32.MaxValue }, p.AL.MI32);
+            Assert.AreEqual(new[] { (MyInteger32)Int32.MinValue, (MyInteger32)0, (MyInteger32)Int32.MaxValue }, p.AL.MI32);
             Assert.AreEqual(new[] { Int64.MinValue, 0, Int64.MaxValue, }, p.AL.MI64);
             Assert.AreEqual(new[] { Single.MinValue, 0,0.111111111112f, 0.22f, 0.33f, 0.44f, 0.55f, Single.MaxValue}, p.AL.MF32);
             Assert.AreEqual(new[] { Double.MinValue, 0,0.111111111112d, 0.22d, 0.33d, 0.44d, 0.55d, Double.MaxValue }, p.AL.MF64);
             Assert.AreEqual(new[] { "hello", "world" }, p.AL.MS);
-            Assert.AreEqual(new[] { TestEnum.TestEnumValue1, TestEnum.TestEnumValue2 }, p.AL.E);
+            Assert.AreEqual(new[] { TestEnum.Value1, TestEnum.Value2 }, p.AL.E);
             Assert.AreEqual(new[] { true, false }, p.AL.B);
         }
 

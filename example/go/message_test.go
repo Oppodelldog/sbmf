@@ -89,7 +89,7 @@ func TestAlias(t *testing.T) {
 		MF32: 3.3,
 		MF64: 4.4,
 		MS:   "hello",
-		E:    TestEnumTestEnumValue2,
+		E:    TestEnumValue2,
 		B:    true,
 	}
 
@@ -121,7 +121,7 @@ func TestAliasLists(t *testing.T) {
 		MF32: []MyFloat32{float32Min, 0, 0.11, 0.22, 0.33, 0.44, 0.55, math.MaxFloat32},
 		MF64: []MyFloat64{float64Min, 0, 0.11, 0.22, 0.33, 0.44, 0.55, math.MaxFloat64},
 		MS:   []MyString{"hello", "world"},
-		E:    []TestEnum{TestEnumTestEnumValue1, TestEnumTestEnumValue2},
+		E:    []TestEnum{TestEnumValue1, TestEnumValue2},
 		B:    []MyBoolean{true, false},
 	}
 
@@ -208,7 +208,7 @@ func getFoobarFixture() Foobar {
 			MF32: 3.3,
 			MF64: 4.4,
 			MS:   "hello",
-			E:    TestEnumTestEnumValue2,
+			E:    TestEnumValue2,
 			B:    true,
 		},
 		P: Primitive{
@@ -225,7 +225,7 @@ func getFoobarFixture() Foobar {
 			MF32: []MyFloat32{float32Min, 0, 0.111111111112, 0.22, 0.33, 0.44, 0.55, math.MaxFloat32},
 			MF64: []MyFloat64{float64Min, 0, 0.111111111112, 0.22, 0.33, 0.44, 0.55, math.MaxFloat64},
 			MS:   []MyString{"hello", "world"},
-			E:    []TestEnum{TestEnumTestEnumValue1, TestEnumTestEnumValue2},
+			E:    []TestEnum{TestEnumValue1, TestEnumValue2},
 			B:    []MyBoolean{true, false},
 		},
 		PL: PrimitiveLists{
@@ -293,7 +293,7 @@ func TestCrossLanguageAlias(t *testing.T) {
 	//TODO: check why this fails, go -> c# works
 	//assertEquals(t, a.MF64, MyFloat64(4.4))
 	assertEquals(t, a.MS, MyString("hello"))
-	assertEquals(t, a.E, TestEnumTestEnumValue2)
+	assertEquals(t, a.E, TestEnumValue2)
 	assertEquals(t, a.B, MyBoolean(true))
 }
 
@@ -329,7 +329,7 @@ func TestCrossLanguageAliasList(t *testing.T) {
 	assertSlicesEqual(t, al.MF32, []MyFloat32{float32Min, 0, 0.6, 0.7, 0.8, 0.9, 1.0, math.MaxFloat32})
 	//assertSlicesEqual(t, al.MF64, []MyFloat64{10.10, 11.11, 12.12})
 	assertSlicesEqual(t, al.MS, []MyString{"hello", "world"})
-	assertSlicesEqual(t, al.E, []TestEnum{TestEnumTestEnumValue1, TestEnumTestEnumValue2})
+	assertSlicesEqual(t, al.E, []TestEnum{TestEnumValue1, TestEnumValue2})
 	assertSlicesEqual(t, al.B, []MyBoolean{true, false, true})
 }
 

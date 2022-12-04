@@ -44,7 +44,7 @@ func goType(t string) string {
 	return t
 }
 
-func goTemplate(_ findAliasTypeFunc, _ isEnumFunc, _ isMessageFunc) (*template.Template, error) {
+func goTemplate(g *Generator) (*template.Template, error) {
 	t := template.New("go-generator").
 		Funcs(template.FuncMap{
 			"loop": func(n int) []int {
@@ -53,6 +53,9 @@ func goTemplate(_ findAliasTypeFunc, _ isEnumFunc, _ isMessageFunc) (*template.T
 					a[i] = i
 				}
 				return a
+			},
+			"typeDoesNotExist": func(t EnumName) bool {
+				return !g.hasType(string(t))
 			},
 		})
 
