@@ -19,8 +19,7 @@ type (
 		Name  string
 		Value int
 	}
-	TypeName string
-	TypeDef  struct {
+	TypeDef struct {
 		Name         string
 		Type         string
 		Dim          int
