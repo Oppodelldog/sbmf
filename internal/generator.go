@@ -42,7 +42,6 @@ type (
 		MapAliasType    typeMapper
 		MapMessageType  typeMapper
 		ProvideTemplate templateProvider
-		ListTypes       map[string][]int
 		MessageIDs      map[MessageName]int
 	}
 )
@@ -62,13 +61,6 @@ func (g *Generator) addEnum(name EnumName, values []EnumValue) {
 
 func (g *Generator) addMessage(name MessageName, fields []TypeDef) {
 	g.Messages[name] = fields
-	for _, f := range fields {
-		if f.Dim == 0 {
-			continue
-		}
-
-		g.AddListType(g.MapAliasType(f.Type), f.Dim)
-	}
 }
 
 func (g *Generator) generate() string {
@@ -118,16 +110,6 @@ func (g *Generator) AddInternalType(def TypeDef) {
 	g.InternalTypes = append(g.InternalTypes, def)
 }
 
-func (g *Generator) AddListType(aliasType string, dimensions int) {
-	if _, exists := g.ListTypes[aliasType]; !exists {
-		g.ListTypes[aliasType] = []int{dimensions}
-	} else {
-		if !contains(g.ListTypes[aliasType], dimensions) {
-			g.ListTypes[aliasType] = append(g.ListTypes[aliasType], dimensions)
-		}
-	}
-}
-
 func (g *Generator) isEnum(t string) bool {
 	if _, exists := g.Enums[EnumName(t)]; exists {
 		return true
@@ -163,6 +145,40 @@ func (g *Generator) hasType(s string) bool {
 	}
 
 	return false
+}
+
+func (g *Generator) listTypes() []TypeDef {
+	var types []TypeDef
+	for _, t := range g.InternalTypes {
+		if t.Dim > 0 {
+			types = append(types, t)
+		}
+	}
+	for _, t := range g.Messages {
+		for _, f := range t {
+			if f.Dim > 0 {
+				types = append(types, f)
+			}
+		}
+	}
+	return types
+}
+
+func (g *Generator) mapTypes() []TypeDef {
+	var types []TypeDef
+	for _, t := range g.InternalTypes {
+		if t.DictKey != "" {
+			types = append(types, t)
+		}
+	}
+	for _, t := range g.Messages {
+		for _, f := range t {
+			if f.DictKey != "" {
+				types = append(types, f)
+			}
+		}
+	}
+	return types
 }
 
 func contains(dims []int, dimensions int) bool {

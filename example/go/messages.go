@@ -31,12 +31,12 @@ const (
 
 type (
 // CustomTypes
+    MyString string
     MyBoolean bool
     MyFloat32 float32
     MyFloat64 float64
     MyInteger32 int32
     MyInteger64 int64
-    MyString string
 
 // Enums
         TestEnum int32
@@ -121,6 +121,14 @@ return unmarshalString(r, v)
     return nil
 
 // CustomTypes
+    case *MyString:
+    var t string
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return e
+    }
+    *v = MyString(t)
+    return nil
     case *MyBoolean:
     var t bool
     var e=unmarshal(&t,r)
@@ -161,47 +169,39 @@ return unmarshalString(r, v)
     }
     *v = MyInteger64(t)
     return nil
-    case *MyString:
-    var t string
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return e
-    }
-    *v = MyString(t)
-    return nil
 
 // ListTypes
-    case *[]MyBoolean:
+    case *[]int32:
         return unmarshalSlice(r,v)
-    case *[]MyFloat32:
-        return unmarshalSlice(r,v)
-    case *[]MyFloat64:
-        return unmarshalSlice(r,v)
-    case *[]MyInteger32:
-        return unmarshalSlice(r,v)
-    case *[]MyInteger64:
-        return unmarshalSlice(r,v)
-    case *[]MyString:
-        return unmarshalSlice(r,v)
-    case *[]TestEnum:
-        return unmarshalSlice(r,v)
-    case *[]bool:
+    case *[]int64:
         return unmarshalSlice(r,v)
     case *[]float32:
         return unmarshalSlice(r,v)
     case *[]float64:
         return unmarshalSlice(r,v)
-    case *[]int32:
-        return unmarshalSlice(r,v)
     case *[][]int32:
-        return unmarshalSlice(r,v)
-    case *[]int64:
         return unmarshalSlice(r,v)
     case *[][]int64:
         return unmarshalSlice(r,v)
     case *[]string:
         return unmarshalSlice(r,v)
     case *[][]string:
+        return unmarshalSlice(r,v)
+    case *[]bool:
+        return unmarshalSlice(r,v)
+    case *[]MyInteger32:
+        return unmarshalSlice(r,v)
+    case *[]MyInteger64:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat32:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat64:
+        return unmarshalSlice(r,v)
+    case *[]MyString:
+        return unmarshalSlice(r,v)
+    case *[]TestEnum:
+        return unmarshalSlice(r,v)
+    case *[]MyBoolean:
         return unmarshalSlice(r,v)
 
 default:
@@ -263,6 +263,8 @@ return marshalString(w, v)
     return binary.Write(w, binary.LittleEndian, int32(v))
 
 // CustomTypes
+    case MyString:
+    return marshal(string(v),w)
     case MyBoolean:
     return marshal(bool(v),w)
     case MyFloat32:
@@ -273,42 +275,40 @@ return marshalString(w, v)
     return marshal(int32(v),w)
     case MyInteger64:
     return marshal(int64(v),w)
-    case MyString:
-    return marshal(string(v),w)
 
 // ListTypes
-    case []MyBoolean:
-        return marshalSlice(w,v)
-    case []MyFloat32:
-        return marshalSlice(w,v)
-    case []MyFloat64:
-        return marshalSlice(w,v)
     case []MyInteger32:
-        return marshalSlice(w,v)
+    return marshalSlice(w,v)
     case []MyInteger64:
-        return marshalSlice(w,v)
+    return marshalSlice(w,v)
+    case []MyFloat32:
+    return marshalSlice(w,v)
+    case []MyFloat64:
+    return marshalSlice(w,v)
     case []MyString:
-        return marshalSlice(w,v)
+    return marshalSlice(w,v)
     case []TestEnum:
-        return marshalSlice(w,v)
-    case []bool:
-        return marshalSlice(w,v)
-    case []float32:
-        return marshalSlice(w,v)
-    case []float64:
-        return marshalSlice(w,v)
+    return marshalSlice(w,v)
+    case []MyBoolean:
+    return marshalSlice(w,v)
     case []int32:
-        return marshalSlice(w,v)
-    case [][]int32:
-        return marshalSlice(w,v)
+    return marshalSlice(w,v)
     case []int64:
-        return marshalSlice(w,v)
+    return marshalSlice(w,v)
+    case []float32:
+    return marshalSlice(w,v)
+    case []float64:
+    return marshalSlice(w,v)
+    case [][]int32:
+    return marshalSlice(w,v)
     case [][]int64:
-        return marshalSlice(w,v)
+    return marshalSlice(w,v)
     case []string:
-        return marshalSlice(w,v)
+    return marshalSlice(w,v)
     case [][]string:
-        return marshalSlice(w,v)
+    return marshalSlice(w,v)
+    case []bool:
+    return marshalSlice(w,v)
 
 default:
 return binary.Write(w, binary.LittleEndian, v)

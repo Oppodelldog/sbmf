@@ -2,6 +2,7 @@ package internal
 
 import (
 	"sbmf/internal/templates"
+	"strings"
 	"text/template"
 )
 
@@ -14,7 +15,6 @@ func newGoGenerator(version int, p, o string) *Generator {
 		MapMessageType:  goType,
 		ProvideTemplate: goTemplate,
 		CustomTypes:     []TypeDef{},
-		ListTypes:       map[string][]int{},
 		Enums:           make(map[EnumName][]EnumValue),
 		Messages:        make(map[MessageName][]TypeDef),
 		MessageIDs:      map[MessageName]int{},
@@ -57,6 +57,18 @@ func goTemplate(g *Generator) (*template.Template, error) {
 			"typeDoesNotExist": func(t EnumName) bool {
 				return !g.hasType(string(t))
 			},
+			"typeDef": func(typeDef TypeDef) string {
+				if typeDef.Dim > 0 {
+					return strings.Repeat("[]", typeDef.Dim) + typeDef.Type
+				}
+				if typeDef.DictKey != "" {
+					return "map[" + typeDef.DictKey + "]" + typeDef.Type
+				}
+
+				return typeDef.Type
+			},
+			"listTypes": g.listTypes,
+			"mapTypes":  g.mapTypes,
 		})
 
 	t, err := t.Parse(templates.Go)

@@ -89,11 +89,9 @@ return unmarshalString(r, v)
 {{- end }}
 
 // ListTypes
-{{- range $type, $dims := .ListTypes }}
-    {{- range $dims }}
-    case *{{range loop . }}[]{{end}}{{ $type }}:
+{{- range $type := listTypes }}
+    case *{{ typeDef $type }}:
         return unmarshalSlice(r,v)
-    {{- end}}
 {{- end }}
 
 default:
@@ -132,11 +130,9 @@ return marshalString(w, v)
 {{- end }}
 
 // ListTypes
-{{- range  $type, $dims := .ListTypes }}
-    {{- range $dims }}
-    case {{ range loop . }}[]{{ end}}{{ $type }}:
-        return marshalSlice(w,v)
-    {{- end}}
+{{- range $type := listTypes }}
+    case {{ typeDef $type }}:
+    return marshalSlice(w,v)
 {{- end }}
 
 default:
