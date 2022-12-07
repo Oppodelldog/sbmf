@@ -23,6 +23,7 @@ type (
 		Name         string
 		Type         string
 		Dim          int
+		DictKey      string
 		OriginalType string
 	}
 	MessageName string

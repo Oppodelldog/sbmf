@@ -122,10 +122,17 @@ func Generate(file string) {
 }
 
 func newTypeDef(name, t string) TypeDef {
+	var dictKey string
 	var dim = strings.Count(t, "<")
 	t = t[dim : len(t)-dim]
 
-	return TypeDef{Name: name, Type: t, Dim: dim}
+	if strings.Contains(t, ",") {
+		var parts = strings.Split(t, ",")
+		t = parts[1]
+		dictKey = parts[0]
+	}
+
+	return TypeDef{Name: name, Type: t, DictKey: dictKey, Dim: dim}
 }
 
 func isListType(t string) bool {
