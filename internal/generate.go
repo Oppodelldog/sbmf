@@ -99,14 +99,14 @@ func Generate(file string) {
 			case "messages":
 				for _, v2 := range v1.([]interface{}) {
 
-					var fields []FieldDef
+					var fields []TypeDef
 					for k3, v3 := range v2.(map[interface{}]interface{}) {
 						for _, v4 := range v3.([]interface{}) {
 							for k5, v5 := range v4.(map[interface{}]interface{}) {
 								var t = v5.(string)
 								var dim = strings.Count(t, "<")
 								t = t[dim : len(t)-dim]
-								fields = append(fields, FieldDef{Name: k5.(string), Type: t, Dim: dim})
+								fields = append(fields, TypeDef{Name: k5.(string), Type: t, Dim: dim})
 							}
 						}
 						gen.addMessage(MessageName(k3.(string)), fields)

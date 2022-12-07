@@ -16,7 +16,7 @@ func newGoGenerator(version int, p, o string) *Generator {
 		Types:           []TypeDef{},
 		ListTypes:       map[string][]int{},
 		Enums:           make(map[EnumName][]EnumValue),
-		Messages:        make(map[MessageName][]FieldDef),
+		Messages:        make(map[MessageName][]TypeDef),
 		MessageIDs:      map[MessageName]int{},
 	}
 }

@@ -23,15 +23,11 @@ type (
 	TypeDef  struct {
 		Name         string
 		Type         string
+		Dim          int
 		OriginalType string
 	}
 	MessageName string
-	FieldDef    struct {
-		Name string
-		Type string
-		Dim  int
-	}
-	Generator struct {
+	Generator   struct {
 		Version int
 		// Output file path
 		Output string
@@ -42,7 +38,7 @@ type (
 		Types           []TypeDef
 		InternalTypes   []TypeDef
 		Enums           map[EnumName][]EnumValue
-		Messages        map[MessageName][]FieldDef
+		Messages        map[MessageName][]TypeDef
 		MapAliasType    typeMapper
 		MapMessageType  typeMapper
 		ProvideTemplate templateProvider
@@ -64,7 +60,7 @@ func (g *Generator) addEnum(name EnumName, values []EnumValue) {
 	g.Enums[name] = values
 }
 
-func (g *Generator) addMessage(name MessageName, fields []FieldDef) {
+func (g *Generator) addMessage(name MessageName, fields []TypeDef) {
 	g.Messages[name] = fields
 	for _, f := range fields {
 		if f.Dim == 0 {
