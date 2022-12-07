@@ -14,7 +14,7 @@ func newCSGenerator(version int, ns, o string) *Generator {
 		MapAliasType:    csAliasType,
 		MapMessageType:  csType,
 		ProvideTemplate: csharpTemplate,
-		Types:           []TypeDef{},
+		CustomTypes:     []TypeDef{},
 		ListTypes:       map[string][]int{},
 		Enums:           make(map[EnumName][]EnumValue),
 		Messages:        make(map[MessageName][]TypeDef),

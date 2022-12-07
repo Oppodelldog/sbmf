@@ -13,7 +13,7 @@ func newGoGenerator(version int, p, o string) *Generator {
 		MapAliasType:    goType,
 		MapMessageType:  goType,
 		ProvideTemplate: goTemplate,
-		Types:           []TypeDef{},
+		CustomTypes:     []TypeDef{},
 		ListTypes:       map[string][]int{},
 		Enums:           make(map[EnumName][]EnumValue),
 		Messages:        make(map[MessageName][]TypeDef),

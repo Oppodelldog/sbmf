@@ -35,7 +35,7 @@ type (
 		Namespace string
 		// Go package
 		Package         string
-		Types           []TypeDef
+		CustomTypes     []TypeDef
 		InternalTypes   []TypeDef
 		Enums           map[EnumName][]EnumValue
 		Messages        map[MessageName][]TypeDef
@@ -53,7 +53,7 @@ func (g *Generator) WriteFile() error {
 }
 
 func (g *Generator) addType(type_ TypeDef) {
-	g.Types = append(g.Types, type_)
+	g.CustomTypes = append(g.CustomTypes, type_)
 }
 
 func (g *Generator) addEnum(name EnumName, values []EnumValue) {
@@ -98,14 +98,14 @@ func (g *Generator) patchMessageTypes() {
 }
 
 func (g *Generator) patchAliasTypes() {
-	for i, values := range g.Types {
-		g.Types[i].Type = g.MapAliasType(values.Type)
-		g.Types[i].OriginalType = values.Type
+	for i, values := range g.CustomTypes {
+		g.CustomTypes[i].Type = g.MapAliasType(values.Type)
+		g.CustomTypes[i].OriginalType = values.Type
 	}
 }
 
 func (g *Generator) findAliasType(t string) string {
-	for _, v := range g.Types {
+	for _, v := range g.CustomTypes {
 		if v.Name == t {
 			return v.OriginalType
 		}
@@ -156,7 +156,7 @@ func (g *Generator) CreateMessageIDs() {
 }
 
 func (g *Generator) hasType(s string) bool {
-	for _, t := range g.Types {
+	for _, t := range g.CustomTypes {
 		if t.Name == s {
 			return true
 		}
