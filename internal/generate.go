@@ -104,10 +104,7 @@ func Generate(file string) {
 					for k3, v3 := range v2.(map[interface{}]interface{}) {
 						for _, v4 := range v3.([]interface{}) {
 							for k5, v5 := range v4.(map[interface{}]interface{}) {
-								var t = v5.(string)
-								var dim = strings.Count(t, "<")
-								t = t[dim : len(t)-dim]
-								fields = append(fields, TypeDef{Name: k5.(string), Type: t, Dim: dim})
+								fields = append(fields, newTypeDef(k5.(string), v5.(string)))
 							}
 						}
 						gen.addMessage(MessageName(k3.(string)), fields)
@@ -122,6 +119,13 @@ func Generate(file string) {
 			fmt.Printf("error: %v", err)
 		}
 	}
+}
+
+func newTypeDef(name, t string) TypeDef {
+	var dim = strings.Count(t, "<")
+	t = t[dim : len(t)-dim]
+
+	return TypeDef{Name: name, Type: t, Dim: dim}
 }
 
 func isListType(t string) bool {
