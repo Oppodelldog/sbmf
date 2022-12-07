@@ -28,8 +28,8 @@ const (
 )
 
 type (
-// Types
-{{- range $name, $type := .Types }}
+// CustomTypes
+{{- range $name, $type := .CustomTypes }}
     {{ $type.Name }} {{ $type.Type }}
 {{- end }}
 
@@ -76,8 +76,8 @@ return unmarshalString(r, v)
 {{- end }}
 {{- end }}
 
-// Types
-{{- range $name, $type := .Types }}
+// CustomTypes
+{{- range $name, $type := .CustomTypes }}
     case *{{ $type.Name }}:
     var t {{ $type.Type }}
     var e=unmarshal(&t,r)
@@ -125,8 +125,8 @@ return marshalString(w, v)
 {{- end }}
 {{- end }}
 
-// Types
-{{- range $name, $type := .Types }}
+// CustomTypes
+{{- range $name, $type := .CustomTypes }}
     case {{ $type.Name }}:
     return marshal({{ $type.Type }}(v),w)
 {{- end }}

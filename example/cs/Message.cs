@@ -64,9 +64,6 @@ namespace Messages
         public string[][] S2;
         public System.Boolean[] B;
     }
-    public struct PrimitiveMaps {
-        public  bool[] B;
-    }
 }
 
 namespace Messages.Extensions
@@ -213,20 +210,6 @@ namespace Messages.Extensions
             o.S2 = reader.ReadList<string[]>();
                 o.B = reader.ReadList<System.Boolean>();
         }
-        public static byte[] MarshalBinary(this PrimitiveMaps o)
-        {
-            MemoryStream ms = new MemoryStream();
-            BinaryWriter writer = new BinaryWriter(ms);
-            writer.WriteList(o.B);
-            writer.Flush();
-
-            return ms.ToArray();
-        }
-
-        public static void UnmarshalBinary(ref this PrimitiveMaps o,BinaryReader reader)
-        {
-                o.B = reader.ReadList< bool>();
-        }
 
 
     public static void WriteList(this BinaryWriter writer, IEnumerable list)
@@ -366,8 +349,6 @@ namespace Messages.Extensions
                 return 5;
             case Type t when t == typeof(PrimitiveLists):
                 return 6;
-            case Type t when t == typeof(PrimitiveMaps):
-                return 7;
             default:
                 throw new Exception("Unknown message type " + message.GetType());
         }
@@ -395,9 +376,6 @@ namespace Messages.Extensions
             break;
         case Type t when t == typeof(PrimitiveLists):
             writer.Write(((PrimitiveLists)message).MarshalBinary());
-            break;
-        case Type t when t == typeof(PrimitiveMaps):
-            writer.Write(((PrimitiveMaps)message).MarshalBinary());
             break;
         default:
             throw new Exception("Unknown message type " + message.GetType());
@@ -432,10 +410,6 @@ namespace Messages.Extensions
             var msgPrimitiveLists = new PrimitiveLists();
             msgPrimitiveLists.UnmarshalBinary(reader);
             return msgPrimitiveLists;
-            case 7:
-            var msgPrimitiveMaps = new PrimitiveMaps();
-            msgPrimitiveMaps.UnmarshalBinary(reader);
-            return msgPrimitiveMaps;
             default:
                 throw new Exception("Unknown message id " + messageId);
         }
