@@ -147,18 +147,12 @@ func csharpTemplate(g *Generator) (*template.Template, error) {
 	return t, nil
 }
 
-func isList(t string) bool {
-	return strings.HasSuffix(t, "[]")
-}
-
 func findPrimitiveType(findAliasType findAliasTypeFunc) func(t string) string {
 	return func(t string) string {
-		if strings.HasSuffix(t, "[]") {
-			t = t[0 : len(t)-2]
-		}
+		t = strings.TrimSuffix(t, "[]")
 		var t1 = findAliasType(t)
 		var t2 = csType(t1)
-		//fmt.Printf("%s->%s->%s\n", t, t1, t2)
+
 		return t2
 	}
 }

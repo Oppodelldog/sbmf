@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"reflect"
@@ -194,7 +193,7 @@ func TestFooBar(t *testing.T) {
 
 func writeFile(t *testing.T, name string, data []byte) {
 	t.Helper()
-	err := ioutil.WriteFile(fmt.Sprintf("out-%s", name), data, 0644)
+	err := os.WriteFile(fmt.Sprintf("out-%s", name), data, 0644)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -240,7 +239,7 @@ func getFoobarFixture() Foobar {
 }
 
 func TestRead(t *testing.T) {
-	data, err := ioutil.ReadFile("out-foobar.bin")
+	data, err := os.ReadFile("out-foobar.bin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -254,7 +253,7 @@ func TestRead(t *testing.T) {
 
 func readCsFile(t *testing.T, name string) []byte {
 	t.Helper()
-	data, err := ioutil.ReadFile("../cs/out-" + name)
+	data, err := os.ReadFile("../cs/out-" + name)
 	if err != nil {
 		t.Fatal(err)
 	}

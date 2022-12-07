@@ -31,12 +31,12 @@ const (
 
 type (
 // Types
+    MyFloat64 float64
     MyInteger32 int32
     MyInteger64 int64
     MyString string
     MyBoolean bool
     MyFloat32 float32
-    MyFloat64 float64
 
 // Enums
         TestEnum int32
@@ -121,6 +121,14 @@ return unmarshalString(r, v)
     return nil
 
 // Types
+    case *MyFloat64:
+    var t float64
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return e
+    }
+    *v = MyFloat64(t)
+    return nil
     case *MyInteger32:
     var t int32
     var e=unmarshal(&t,r)
@@ -160,14 +168,6 @@ return unmarshalString(r, v)
     return e
     }
     *v = MyFloat32(t)
-    return nil
-    case *MyFloat64:
-    var t float64
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return e
-    }
-    *v = MyFloat64(t)
     return nil
 
 // ListTypes
@@ -263,6 +263,8 @@ return marshalString(w, v)
     return binary.Write(w, binary.LittleEndian, int32(v))
 
 // Types
+    case MyFloat64:
+    return marshal(float64(v),w)
     case MyInteger32:
     return marshal(int32(v),w)
     case MyInteger64:
@@ -273,8 +275,6 @@ return marshalString(w, v)
     return marshal(bool(v),w)
     case MyFloat32:
     return marshal(float32(v),w)
-    case MyFloat64:
-    return marshal(float64(v),w)
 
 // ListTypes
     case []MyBoolean:
