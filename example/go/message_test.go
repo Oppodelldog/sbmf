@@ -154,7 +154,8 @@ func TestPrimitiveMaps(t *testing.T) {
 		S:     map[string]string{"hello": "world", "you": "are"},
 		B:     map[bool]bool{true: false, false: true},
 		SI32:  map[string]int32{"one": 1, "two": 2, "three": 3},
-		SII32: map[string][]int32{"twenties": {20, 21, 22}, "thirties": {30, 31, 32}},
+		SII32: map[MyString][]int32{"twenties": {20, 21, 22}, "thirties": {30, 31, 32}},
+		SOF:   map[string]OneField{"one": {S: "field"}, "two": {S: "fields"}},
 	}
 
 	d, err := foo.MarshalBinary()
@@ -177,6 +178,7 @@ func TestPrimitiveMaps(t *testing.T) {
 	assertMapsEqual(t, foo2.B, foo.B)
 	assertMapsEqual(t, foo2.SI32, foo.SI32)
 	assertMapsEqual(t, foo2.SII32, foo.SII32)
+	assertMapsEqual(t, foo2.SOF, foo.SOF)
 }
 
 func TestFooBar(t *testing.T) {
@@ -364,7 +366,7 @@ func TestCrossLanguagePrimitiveMaps(t *testing.T) {
 	assertMapsEqual(t, pm.S, map[string]string{"hello": "world", "you": "are"})
 	assertMapsEqual(t, pm.B, map[bool]bool{true: false, false: true})
 	assertMapsEqual(t, pm.SI32, map[string]int32{"hello": 1, "world": 2})
-	assertMapsEqual(t, pm.SII32, map[string][]int32{"twenties": {20, 21, 22}, "thirties": {30, 31, 32}})
+	assertMapsEqual(t, pm.SII32, map[MyString][]int32{"twenties": {20, 21, 22}, "thirties": {30, 31, 32}})
 }
 
 func TestCrossLanguageAliasList(t *testing.T) {

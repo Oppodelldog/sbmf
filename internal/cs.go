@@ -137,17 +137,10 @@ func csharpTemplate(g *Generator) (*template.Template, error) {
 			return a
 		},
 		"typeDef": func(typeDef TypeDef) string {
-			var t string
-			if g.isEnum(typeDef.Type) || g.isMessage(typeDef.Type) {
-				t = typeDef.Type
-			} else if g.isCustomType(typeDef.Type) {
-				t = internalTypeToCS(g.getCustomType(typeDef.Type))
-			} else {
-				t = internalTypeToCS(typeDef.Type)
-			}
+			var t = getCsType(typeDef.Type, g)
 
 			if typeDef.DictKey != "" {
-				var k = g.MapAliasType(typeDef.DictKey)
+				var k = getCsType(typeDef.DictKey, g)
 				return "Dictionary<" + k + ", " + t + strings.Repeat("[]", typeDef.Dim) + ">"
 			} else if typeDef.Dim > 0 {
 				return t + strings.Repeat("[]", typeDef.Dim)
@@ -163,6 +156,19 @@ func csharpTemplate(g *Generator) (*template.Template, error) {
 	}
 
 	return t, nil
+}
+
+func getCsType(typeName string, g *Generator) string {
+	var t string
+	if g.isEnum(typeName) || g.isMessage(typeName) {
+		t = typeName
+	} else if g.isCustomType(typeName) {
+		t = internalTypeToCS(g.getCustomType(typeName))
+	} else {
+		t = internalTypeToCS(typeName)
+	}
+
+	return t
 }
 
 func findPrimitiveType(findAliasType findAliasTypeFunc) func(t string) string {

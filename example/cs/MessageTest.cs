@@ -83,6 +83,7 @@ namespace cs
                 B = new Dictionary<bool, bool> { { true, false }, { false, true } },
                 SI32 = new Dictionary<string, int> { { "hello", 1 }, { "world", 2 } },
                 SII32 = new Dictionary<string, int[]> { { "twenties", new[] { 20, 21, 22 } }, { "thirties", new[] { 30, 31, 32 } } },
+                SOF = new Dictionary<string, OneField>() { { "one", new OneField { S = "field" } }, { "two", new OneField { S = "fields" } } }
             };
 
             var p2 = new PrimitiveMaps();
@@ -98,6 +99,8 @@ namespace cs
             Assert.AreEqual(p.S, p2.S);
             Assert.AreEqual(p.B, p2.B);
             Assert.AreEqual(p.SI32, p2.SI32);
+            Assert.AreEqual(p.SII32, p2.SII32);
+            Assert.AreEqual(p.SOF, p2.SOF);
         }
 
         [Test]

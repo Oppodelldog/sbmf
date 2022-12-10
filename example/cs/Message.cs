@@ -66,14 +66,15 @@ namespace Messages
         public System.Boolean[] B;
     }
     public struct PrimitiveMaps {
-        public Dictionary<System.Int32, int> I32;
-        public Dictionary<System.Int64, long> I64;
-        public Dictionary<System.Single, float> F32;
-        public Dictionary<System.Double, double> F64;
-        public Dictionary<System.String, string> S;
+        public Dictionary<int, int> I32;
+        public Dictionary<long, long> I64;
+        public Dictionary<float, float> F32;
+        public Dictionary<double, double> F64;
+        public Dictionary<string, string> S;
         public Dictionary<System.Boolean, System.Boolean> B;
-        public Dictionary<System.String, int> SI32;
-        public Dictionary<System.String, int[]> SII32;
+        public Dictionary<string, int> SI32;
+        public Dictionary<string, int[]> SII32;
+        public Dictionary<string, OneField> SOF;
     }
 }
 
@@ -233,6 +234,7 @@ namespace Messages.Extensions
             writer.WriteMap(o.B,writer.Write,writer.Write);
             writer.WriteMap(o.SI32,writer.WriteStringSbmf,writer.Write);
             writer.WriteMap(o.SII32,writer.WriteStringSbmf,writer.WriteList);
+            writer.WriteMap(o.SOF,writer.WriteStringSbmf,writer.Write);
             writer.Flush();
 
             return ms.ToArray();
@@ -248,7 +250,88 @@ namespace Messages.Extensions
             o.B = ReadMap(reader, reader.ReadBoolean,reader.ReadBoolean);
             o.SI32 = ReadMap(reader, reader.ReadStringSbmf,reader.ReadInt32);
             o.SII32 = ReadMap(reader, reader.ReadStringSbmf,reader.ReadList<int>);
+            o.SOF = ReadMap(reader, reader.ReadStringSbmf,reader.ReadOneField);
         }
+
+
+// Messages Read/Write extensions
+    public static void Write(this BinaryWriter writer, Alias o)
+    {
+        writer.Write(o.MarshalBinary());
+    }
+
+    public static Alias ReadAlias(this BinaryReader reader)
+    {
+        Alias o = new Alias();
+        o.UnmarshalBinary(reader);
+        return o;
+    }
+    public static void Write(this BinaryWriter writer, AliasLists o)
+    {
+        writer.Write(o.MarshalBinary());
+    }
+
+    public static AliasLists ReadAliasLists(this BinaryReader reader)
+    {
+        AliasLists o = new AliasLists();
+        o.UnmarshalBinary(reader);
+        return o;
+    }
+    public static void Write(this BinaryWriter writer, Foobar o)
+    {
+        writer.Write(o.MarshalBinary());
+    }
+
+    public static Foobar ReadFoobar(this BinaryReader reader)
+    {
+        Foobar o = new Foobar();
+        o.UnmarshalBinary(reader);
+        return o;
+    }
+    public static void Write(this BinaryWriter writer, OneField o)
+    {
+        writer.Write(o.MarshalBinary());
+    }
+
+    public static OneField ReadOneField(this BinaryReader reader)
+    {
+        OneField o = new OneField();
+        o.UnmarshalBinary(reader);
+        return o;
+    }
+    public static void Write(this BinaryWriter writer, Primitive o)
+    {
+        writer.Write(o.MarshalBinary());
+    }
+
+    public static Primitive ReadPrimitive(this BinaryReader reader)
+    {
+        Primitive o = new Primitive();
+        o.UnmarshalBinary(reader);
+        return o;
+    }
+    public static void Write(this BinaryWriter writer, PrimitiveLists o)
+    {
+        writer.Write(o.MarshalBinary());
+    }
+
+    public static PrimitiveLists ReadPrimitiveLists(this BinaryReader reader)
+    {
+        PrimitiveLists o = new PrimitiveLists();
+        o.UnmarshalBinary(reader);
+        return o;
+    }
+    public static void Write(this BinaryWriter writer, PrimitiveMaps o)
+    {
+        writer.Write(o.MarshalBinary());
+    }
+
+    public static PrimitiveMaps ReadPrimitiveMaps(this BinaryReader reader)
+    {
+        PrimitiveMaps o = new PrimitiveMaps();
+        o.UnmarshalBinary(reader);
+        return o;
+    }
 
     public static Dictionary<TKey,TValue> ReadMap<TKey,TValue>(BinaryReader reader, Func<TKey> readKey,Func<TValue> readValue)
     {

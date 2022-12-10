@@ -65,7 +65,11 @@ namespace {{ .Namespace }}.Extensions
             {{- if isStringList .Type .Dim }}
             o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}{{range loopless .Dim }}[]{{end}}>();
             {{- else if isMap . }}
-            o.{{ .Name }} = ReadMap(reader, reader.{{ readFunc .DictKey }},{{- if isList .Dim }}reader.ReadList<{{findPrimitiveType .Type}}>{{- else}}reader.{{ readFunc .Type }}{{- end}});
+            o.{{ .Name }} = ReadMap(reader, reader.{{ readFunc .DictKey }},
+                {{- if isList .Dim }}reader.ReadList<{{findPrimitiveType .Type}}>
+                    {{- else if isMessage .Type }}reader.Read{{ .Type }}
+                    {{- else}}reader.{{ readFunc .Type }}
+                {{- end}});
             {{- else if isString .Type }}
             o.{{ .Name }} = reader.ReadStringSbmf();
             {{- else if isList .Dim }}
@@ -87,6 +91,22 @@ namespace {{ .Namespace }}.Extensions
         }
 
     {{- end }}
+
+
+// Messages Read/Write extensions
+{{- range $name, $fields := .Messages }}
+    public static void Write(this BinaryWriter writer, {{ $name }} o)
+    {
+        writer.Write(o.MarshalBinary());
+    }
+
+    public static {{ $name }} Read{{ $name }}(this BinaryReader reader)
+    {
+        {{ $name }} o = new {{ $name }}();
+        o.UnmarshalBinary(reader);
+        return o;
+    }
+{{- end }}
 
     public static Dictionary<TKey,TValue> ReadMap<TKey,TValue>(BinaryReader reader, Func<TKey> readKey,Func<TValue> readValue)
     {
