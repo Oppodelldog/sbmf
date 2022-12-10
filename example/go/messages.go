@@ -33,12 +33,12 @@ const (
 
 type (
     // CustomTypes
+    MyInteger32 int32
+    MyInteger64 int64
     MyString string
     MyBoolean bool
     MyFloat32 float32
     MyFloat64 float64
-    MyInteger32 int32
-    MyInteger64 int64
 
     // Enums
         TestEnum int32
@@ -134,6 +134,22 @@ func unmarshal(v interface{}, r io.Reader) error {
     return nil
 
     // CustomTypes
+    case *MyInteger32:
+    var t int32
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return fmt.Errorf("err unmarshal MyInteger32: %w", e)
+    }
+    *v = MyInteger32(t)
+    return nil
+    case *MyInteger64:
+    var t int64
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return fmt.Errorf("err unmarshal MyInteger64: %w", e)
+    }
+    *v = MyInteger64(t)
+    return nil
     case *MyString:
     var t string
     var e=unmarshal(&t,r)
@@ -166,39 +182,25 @@ func unmarshal(v interface{}, r io.Reader) error {
     }
     *v = MyFloat64(t)
     return nil
-    case *MyInteger32:
-    var t int32
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return fmt.Errorf("err unmarshal MyInteger32: %w", e)
-    }
-    *v = MyInteger32(t)
-    return nil
-    case *MyInteger64:
-    var t int64
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return fmt.Errorf("err unmarshal MyInteger64: %w", e)
-    }
-    *v = MyInteger64(t)
-    return nil
 
     // ListTypes
-    case *[]int32:
-        return unmarshalSlice(r,v)
-    case *[]int64:
-        return unmarshalSlice(r,v)
-    case *[]float32:
-        return unmarshalSlice(r,v)
     case *[]float64:
-        return unmarshalSlice(r,v)
-    case *[][]int32:
-        return unmarshalSlice(r,v)
-    case *[][]int64:
         return unmarshalSlice(r,v)
     case *[]string:
         return unmarshalSlice(r,v)
+    case *[]MyBoolean:
+        return unmarshalSlice(r,v)
     case *[][]string:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat32:
+        return unmarshalSlice(r,v)
+    case *[]MyString:
+        return unmarshalSlice(r,v)
+    case *[]int32:
+        return unmarshalSlice(r,v)
+    case *[]float32:
+        return unmarshalSlice(r,v)
+    case *[][]int64:
         return unmarshalSlice(r,v)
     case *[]bool:
         return unmarshalSlice(r,v)
@@ -206,15 +208,13 @@ func unmarshal(v interface{}, r io.Reader) error {
         return unmarshalSlice(r,v)
     case *[]MyInteger64:
         return unmarshalSlice(r,v)
-    case *[]MyFloat32:
-        return unmarshalSlice(r,v)
     case *[]MyFloat64:
         return unmarshalSlice(r,v)
-    case *[]MyString:
+    case *[]int64:
+        return unmarshalSlice(r,v)
+    case *[][]int32:
         return unmarshalSlice(r,v)
     case *[]TestEnum:
-        return unmarshalSlice(r,v)
-    case *[]MyBoolean:
         return unmarshalSlice(r,v)
 
     // MapTypes
@@ -320,6 +320,10 @@ func marshal(v interface{}, w io.Writer) error {
     return binary.Write(w, binary.LittleEndian, int32(v))
 
     // CustomTypes
+    case MyInteger32:
+    return marshal(int32(v),w)
+    case MyInteger64:
+    return marshal(int64(v),w)
     case MyString:
     return marshal(string(v),w)
     case MyBoolean:
@@ -328,43 +332,39 @@ func marshal(v interface{}, w io.Writer) error {
     return marshal(float32(v),w)
     case MyFloat64:
     return marshal(float64(v),w)
-    case MyInteger32:
-    return marshal(int32(v),w)
-    case MyInteger64:
-    return marshal(int64(v),w)
 
     // ListTypes
+    case []MyFloat64:
+    return marshalSlice(w,v)
+    case []TestEnum:
+    return marshalSlice(w,v)
     case []int32:
     return marshalSlice(w,v)
     case []int64:
+    return marshalSlice(w,v)
+    case []MyInteger32:
+    return marshalSlice(w,v)
+    case []MyFloat32:
     return marshalSlice(w,v)
     case []float32:
     return marshalSlice(w,v)
     case []float64:
     return marshalSlice(w,v)
-    case [][]int32:
-    return marshalSlice(w,v)
     case [][]int64:
     return marshalSlice(w,v)
     case []string:
     return marshalSlice(w,v)
-    case [][]string:
-    return marshalSlice(w,v)
     case []bool:
-    return marshalSlice(w,v)
-    case []MyInteger32:
     return marshalSlice(w,v)
     case []MyInteger64:
     return marshalSlice(w,v)
-    case []MyFloat32:
-    return marshalSlice(w,v)
-    case []MyFloat64:
-    return marshalSlice(w,v)
     case []MyString:
     return marshalSlice(w,v)
-    case []TestEnum:
+    case [][]string:
     return marshalSlice(w,v)
     case []MyBoolean:
+    return marshalSlice(w,v)
+    case [][]int32:
     return marshalSlice(w,v)
 
     // MapTypes
@@ -945,7 +945,6 @@ func (pr *PacketReader) Read(r io.Reader) (interface{}, error) {
 
     return nil, nil
 }
-
 
 func marshalMap(w io.Writer, mapValue interface{}) error {
     var mapValueReflect = reflect.ValueOf(mapValue)

@@ -133,20 +133,27 @@ func (g *Generator) hasType(s string) bool {
 }
 
 func (g *Generator) listTypes() []TypeDef {
-	var types []TypeDef
+	var types map[string]TypeDef = make(map[string]TypeDef)
 	for _, t := range g.InternalTypes {
 		if t.Dim > 0 {
-			types = append(types, t)
+			var key = fmt.Sprintf("%s%s%v", t.Type, t.DictKey, t.Dim)
+			types[key] = t
 		}
 	}
 	for _, t := range g.Messages {
 		for _, f := range t {
 			if f.Dim > 0 {
-				types = append(types, f)
+				var key = fmt.Sprintf("%s%s%v", f.Type, f.DictKey, f.Dim)
+				types[key] = f
 			}
 		}
 	}
-	return types
+
+	var res []TypeDef
+	for _, v := range types {
+		res = append(res, v)
+	}
+	return res
 }
 
 func (g *Generator) mapTypes() []TypeDef {

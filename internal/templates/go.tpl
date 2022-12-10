@@ -360,7 +360,6 @@ func (pr *PacketReader) Read(r io.Reader) (interface{}, error) {
     return nil, nil
 }
 
-
 func marshalMap(w io.Writer, mapValue interface{}) error {
     var mapValueReflect = reflect.ValueOf(mapValue)
     var mapLength = mapValueReflect.Len()
