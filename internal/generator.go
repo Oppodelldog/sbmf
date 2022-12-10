@@ -69,9 +69,6 @@ func (g *Generator) generate() string {
 		log.Fatal(err)
 	}
 
-	g.patchAliasTypes()
-	g.patchMessageTypes()
-
 	var sb strings.Builder
 	err = t.Execute(&sb, g)
 	if err != nil {
@@ -81,25 +78,10 @@ func (g *Generator) generate() string {
 	return sb.String()
 }
 
-func (g *Generator) patchMessageTypes() {
-	for name, values := range g.Messages {
-		for i, v := range values {
-			g.Messages[name][i].Type = g.MapMessageType(v.Type)
-		}
-	}
-}
-
-func (g *Generator) patchAliasTypes() {
-	for i, values := range g.CustomTypes {
-		g.CustomTypes[i].Type = g.MapAliasType(values.Type)
-		g.CustomTypes[i].OriginalType = values.Type
-	}
-}
-
 func (g *Generator) findAliasType(t string) string {
 	for _, v := range g.CustomTypes {
 		if v.Name == t {
-			return v.OriginalType
+			return v.Type
 		}
 	}
 
@@ -181,12 +163,26 @@ func (g *Generator) mapTypes() []TypeDef {
 	return types
 }
 
-func contains(dims []int, dimensions int) bool {
-	for _, d := range dims {
-		if d == dimensions {
+func (g *Generator) isCustomType(t string) bool {
+	for _, v := range g.CustomTypes {
+		if v.Name == t {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (g *Generator) getCustomType(t string) string {
+	for _, v := range g.CustomTypes {
+		if v.Name == t {
+			return v.Type
+		}
+	}
+
+	return t
+}
+
+func (g *Generator) isMapType(t TypeDef) bool {
+	return t.DictKey != ""
 }

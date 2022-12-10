@@ -35,10 +35,6 @@ func goType(t string) string {
 		return "float64"
 	case "str":
 		return "string"
-	default:
-		if isListType(t) {
-			return "[]" + t[1:len(t)-1]
-		}
 	}
 
 	return t
@@ -58,14 +54,16 @@ func goTemplate(g *Generator) (*template.Template, error) {
 				return !g.hasType(string(t))
 			},
 			"typeDef": func(typeDef TypeDef) string {
+				t := g.MapMessageType(typeDef.Type)
 				if typeDef.Dim > 0 {
-					return strings.Repeat("[]", typeDef.Dim) + typeDef.Type
+					return strings.Repeat("[]", typeDef.Dim) + t
 				}
 				if typeDef.DictKey != "" {
-					return "map[" + typeDef.DictKey + "]" + typeDef.Type
+					var k = g.MapMessageType(typeDef.DictKey)
+					return "map[" + k + "]" + t
 				}
 
-				return typeDef.Type
+				return t
 			},
 			"listTypes": g.listTypes,
 			"mapTypes":  g.mapTypes,

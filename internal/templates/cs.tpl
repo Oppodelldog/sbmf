@@ -2,6 +2,7 @@
 // @formatter:off
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 namespace {{ .Namespace }}
@@ -17,11 +18,7 @@ namespace {{ .Namespace }}
 {{- range $name, $fields := .Messages }}
     public struct {{ $name }} {
     {{- range $fields }}
-        {{- if isEnum .Type }}
-        public {{ .Type }}{{range loop .Dim }}[]{{end}} {{ .Name }};
-        {{- else }}
-        public {{ findPrimitiveType .Type }}{{range loop .Dim }}[]{{end}} {{ .Name }};
-        {{- end }}
+        public {{ typeDef .}} {{ .Name }};
     {{- end }}
     }
 {{- end }}
@@ -39,8 +36,12 @@ namespace {{ .Namespace }}.Extensions
         {{- range $fields }}
             {{- if isStringList .Type .Dim }}
             writer.WriteList(o.{{ .Name }});
+            {{- else if isMap . }}
+            writer.WriteMap(o.{{ .Name }},
+            {{- if isString .DictKey }}writer.WriteStringSbmf{{- else }}writer.Write{{- end }},
+            {{- if isString .Type }}writer.WriteStringSbmf{{- else }}writer.Write{{- end }});
             {{- else if isString .Type }}
-            WriteString(writer, o.{{ .Name }});
+            writer.WriteStringSbmf(o.{{ .Name }});
             {{- else if isList .Dim }}
             writer.WriteList(o.{{ .Name }});
             {{- else if isPrimitive .Type }}
@@ -63,14 +64,16 @@ namespace {{ .Namespace }}.Extensions
         {{- range $fields }}
             {{- if isStringList .Type .Dim }}
             o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}{{range loopless .Dim }}[]{{end}}>();
+            {{- else if isMap . }}
+            o.{{ .Name }} = ReadMap(reader, reader.{{ readFunc .DictKey }}, reader.{{ readFunc .Type }});
             {{- else if isString .Type }}
-            o.{{ .Name }} = ReadString(reader);
+            o.{{ .Name }} = reader.ReadStringSbmf();
             {{- else if isList .Dim }}
-                {{- if isEnum .Type }}
-                o.{{ .Name }} = reader.ReadList<{{ .Type }}{{range loopless .Dim }}[]{{end}}>();
-                {{- else }}
-                o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}{{range loopless .Dim }}[]{{end}}>();
-                {{- end }}
+            {{- if isEnum .Type }}
+            o.{{ .Name }} = reader.ReadList<{{ .Type }}{{range loopless .Dim }}[]{{end}}>();
+            {{- else }}
+            o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}{{range loopless .Dim }}[]{{end}}>();
+            {{- end }}
             {{- else if isPrimitive .Type }}
             o.{{ .Name }} = reader.{{ readFunc .Type }}();
             {{- else if isEnum .Type }}
@@ -85,6 +88,29 @@ namespace {{ .Namespace }}.Extensions
 
     {{- end }}
 
+    public static Dictionary<TKey,TValue> ReadMap<TKey,TValue>(BinaryReader reader, Func<TKey> readKey,Func<TValue> readValue)
+    {
+            Dictionary<TKey,TValue> m = new Dictionary<TKey,TValue>();
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                TKey key = readKey();
+                TValue value = readValue();
+                m.Add(key, value);
+            }
+
+            return m;
+    }
+
+    public static void WriteMap<TKey, TValue>(this BinaryWriter writer, Dictionary<TKey, TValue> map, Action<TKey> writeKey,Action<TValue> writeValue)
+    {
+        writer.Write(map.Count);
+        foreach (var item in map)
+        {
+            writeKey(item.Key);
+            writeValue(item.Value);
+        }
+    }
 
     public static void WriteList(this BinaryWriter writer, IEnumerable list)
     {
@@ -116,7 +142,7 @@ namespace {{ .Namespace }}.Extensions
             }
             else if(item is string)
             {
-                WriteString(writer, (string)item);
+                writer.WriteStringSbmf((string)item);
             }
             else if(item is bool)
             {
@@ -165,7 +191,7 @@ namespace {{ .Namespace }}.Extensions
             }
             else if (typeof(T) == typeof(string))
             {
-                result[i] = (T)(object)ReadString(reader);
+                result[i] = (T)(object)reader.ReadStringSbmf();
             }
             else if (typeof(T) == typeof(bool))
             {
@@ -192,13 +218,13 @@ namespace {{ .Namespace }}.Extensions
             return result;
     }
 
-    public static void WriteString(BinaryWriter writer, string value)
+    public static void WriteStringSbmf(this BinaryWriter writer, string value)
     {
         writer.Write(value.Length);
         writer.Write(value.ToCharArray());
     }
 
-    public static string ReadString(BinaryReader reader)
+    public static string ReadStringSbmf(this BinaryReader reader)
     {
         return new string(reader.ReadChars(reader.ReadInt32()));
     }

@@ -145,6 +145,38 @@ func TestAliasLists(t *testing.T) {
 	assertSlicesEqual(t, bar2.B, bar.B)
 }
 
+func TestPrimitiveMaps(t *testing.T) {
+	foo := PrimitiveMaps{
+		I32:  map[int32]int32{math.MinInt32: 0, 0: math.MaxInt32},
+		I64:  map[int64]int64{math.MinInt64: 0, 0: math.MaxInt64},
+		F32:  map[float32]float32{float32Min: 0, 0: math.MaxFloat32},
+		F64:  map[float64]float64{float64Min: 0, 0: math.MaxFloat64},
+		S:    map[string]string{"hello": "world"},
+		SI32: map[string]int32{"one": 1, "two": 2, "three": 3},
+		B:    map[bool]bool{true: false},
+	}
+
+	d, err := foo.MarshalBinary()
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, "primitive-maps.bin", d)
+
+	var foo2 PrimitiveMaps
+	err = foo2.UnmarshalBinary(bytes.NewBuffer(d))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertMapsEqual(t, foo2.I32, foo.I32)
+	assertMapsEqual(t, foo2.I64, foo.I64)
+	assertMapsEqual(t, foo2.F32, foo.F32)
+	assertMapsEqual(t, foo2.F64, foo.F64)
+	assertMapsEqual(t, foo2.S, foo.S)
+	assertMapsEqual(t, foo2.SI32, foo.SI32)
+	assertMapsEqual(t, foo2.B, foo.B)
+}
+
 func TestFooBar(t *testing.T) {
 	foo := getFoobarFixture()
 
@@ -313,6 +345,23 @@ func TestCrossLanguagePrimitiveLists(t *testing.T) {
 	assertSlicesEqual(t, pl.S, []string{"hello", "world"})
 	assertSlicesEqual(t, pl.S2, [][]string{{"hello", "world"}, {"you", "are", "wonderful"}})
 	assertSlicesEqual(t, pl.B, []bool{true, false, true})
+}
+
+func TestCrossLanguagePrimitiveMaps(t *testing.T) {
+	data := readCsFile(t, "primitive-maps.bin")
+	var pm PrimitiveMaps
+	err := pm.UnmarshalBinary(bytes.NewBuffer(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertMapsEqual(t, pm.I32, map[int32]int32{1: 2, 3: 4})
+	assertMapsEqual(t, pm.I64, map[int64]int64{5: 6, 7: 8})
+	assertMapsEqual(t, pm.F32, map[float32]float32{9.9: 10.1, 11.1: 12.2})
+	//assertMapsEqual(t, pm.F64, map[float64]float64{13.3: 14.4, 15.5: 16.6})
+	assertMapsEqual(t, pm.S, map[string]string{"hello": "world", "you": "are"})
+	assertMapsEqual(t, pm.B, map[bool]bool{true: false, false: true})
+	assertMapsEqual(t, pm.SI32, map[string]int32{"hello": 1, "world": 2})
 }
 
 func TestCrossLanguageAliasList(t *testing.T) {
@@ -616,6 +665,16 @@ func assertEquals(t *testing.T, a, b any) {
 }
 
 func assertSlicesEqual[T any](t *testing.T, a, b []T) {
+	t.Helper()
+	if len(a) != len(b) {
+		t.Fatalf("len(a) != len(b): %d != %d", len(a), len(b))
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Fatalf("a != b: %v != %v", a, b)
+	}
+}
+
+func assertMapsEqual[K comparable, T any](t *testing.T, a, b map[K]T) {
 	t.Helper()
 	if len(a) != len(b) {
 		t.Fatalf("len(a) != len(b): %d != %d", len(a), len(b))

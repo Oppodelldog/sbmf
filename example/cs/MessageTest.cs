@@ -71,6 +71,35 @@ namespace cs
         }
 
         [Test]
+        public void TestPrimitiveMaps()
+        {
+            var p = new PrimitiveMaps
+            {
+                I32 = new Dictionary<int, int> { { 1, 2 }, { 3, 4 } },
+                I64 = new Dictionary<long, long> { { 5L, 6L }, { 7L, 8L } },
+                F32 = new Dictionary<float, float> { { 9.9f, 10.1f }, { 11.1f, 12.2f } },
+                F64 = new Dictionary<double, double> { { 13.3d, 14.4d }, { 15.5d, 16.6d } },
+                S = new Dictionary<string, string> { { "hello", "world" }, { "you", "are" } },
+                B = new Dictionary<bool, bool> { { true, false }, { false, true } },
+                SI32 = new Dictionary<string, int> { { "hello", 1 }, { "world", 2 } },
+            };
+
+            var p2 = new PrimitiveMaps();
+            var data = p.MarshalBinary();
+            WriteFile("primitive-maps.bin", data);
+            var reader = new BinaryReader(new MemoryStream(data));
+            p2.UnmarshalBinary(reader);
+
+            Assert.AreEqual(p.I32, p2.I32);
+            Assert.AreEqual(p.I64, p2.I64);
+            Assert.AreEqual(p.F32, p2.F32);
+            Assert.AreEqual(p.F64, p2.F64);
+            Assert.AreEqual(p.S, p2.S);
+            Assert.AreEqual(p.B, p2.B);
+            Assert.AreEqual(p.SI32, p2.SI32);
+        }
+
+        [Test]
         public void TestAlias()
         {
             var p = new Alias

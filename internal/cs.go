@@ -11,8 +11,8 @@ func newCSGenerator(version int, ns, o string) *Generator {
 		Version:         version,
 		Output:          o,
 		Namespace:       ns,
-		MapAliasType:    csAliasType,
-		MapMessageType:  csType,
+		MapAliasType:    internalTypeToCSSystemType,
+		MapMessageType:  internalTypeToCS,
 		ProvideTemplate: csharpTemplate,
 		CustomTypes:     []TypeDef{},
 		Enums:           make(map[EnumName][]EnumValue),
@@ -21,7 +21,7 @@ func newCSGenerator(version int, ns, o string) *Generator {
 	}
 }
 
-func csType(t string) string {
+func internalTypeToCS(t string) string {
 	switch t {
 	case "bool":
 		return "System.Boolean"
@@ -44,7 +44,7 @@ func csType(t string) string {
 	return t
 }
 
-func csAliasType(t string) string {
+func internalTypeToCSSystemType(t string) string {
 	switch t {
 	case "bool":
 		return "System.Boolean"
@@ -88,7 +88,7 @@ func csTypeToBinaryReadFuncName(t string) string {
 	case "double":
 		return "ReadDouble"
 	case "string":
-		return "ReadString"
+		return "ReadStringSbmf"
 	default:
 		return ""
 	}
@@ -100,7 +100,7 @@ func csharpTemplate(g *Generator) (*template.Template, error) {
 	t.Funcs(template.FuncMap{
 		"readFunc": func(t string) string {
 			t1 := g.findAliasType(t)
-			t2 := csType(t1)
+			t2 := internalTypeToCS(t1)
 			t3 := csTypeToBinaryReadFuncName(t2)
 
 			return t3
@@ -118,6 +118,7 @@ func csharpTemplate(g *Generator) (*template.Template, error) {
 			return csTypeToBinaryReadFuncName(t) != ""
 		},
 		"isList":            func(i int) bool { return i >= 1 },
+		"isMap":             g.isMapType,
 		"isEnum":            g.isEnum,
 		"isMessage":         g.isMessage,
 		"findPrimitiveType": findPrimitiveType(g.findAliasType),
@@ -135,6 +136,26 @@ func csharpTemplate(g *Generator) (*template.Template, error) {
 			}
 			return a
 		},
+		"typeDef": func(typeDef TypeDef) string {
+			var t string
+			if g.isEnum(typeDef.Type) || g.isMessage(typeDef.Type) {
+				t = typeDef.Type
+			} else if g.isCustomType(typeDef.Type) {
+				t = internalTypeToCS(g.getCustomType(typeDef.Type))
+			} else {
+				t = internalTypeToCS(typeDef.Type)
+			}
+
+			if typeDef.Dim > 0 {
+				return t + strings.Repeat("[]", typeDef.Dim)
+			}
+			if typeDef.DictKey != "" {
+				var k = g.MapAliasType(typeDef.DictKey)
+				return "Dictionary<" + k + ", " + t + ">"
+			}
+
+			return t
+		},
 	})
 
 	var err error
@@ -150,7 +171,7 @@ func findPrimitiveType(findAliasType findAliasTypeFunc) func(t string) string {
 	return func(t string) string {
 		t = strings.TrimSuffix(t, "[]")
 		var t1 = findAliasType(t)
-		var t2 = csType(t1)
+		var t2 = internalTypeToCS(t1)
 
 		return t2
 	}

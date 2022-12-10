@@ -2,6 +2,7 @@
 // @formatter:off
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Messages
@@ -64,6 +65,15 @@ namespace Messages
         public string[][] S2;
         public System.Boolean[] B;
     }
+    public struct PrimitiveMaps {
+        public Dictionary<System.Int32, int> I32;
+        public Dictionary<System.Int64, long> I64;
+        public Dictionary<System.Single, float> F32;
+        public Dictionary<System.Double, double> F64;
+        public Dictionary<System.String, string> S;
+        public Dictionary<System.Boolean, System.Boolean> B;
+        public Dictionary<System.String, int> SI32;
+    }
 }
 
 namespace Messages.Extensions
@@ -78,7 +88,7 @@ namespace Messages.Extensions
             writer.Write(o.MI64);
             writer.Write(o.MF32);
             writer.Write(o.MF64);
-            WriteString(writer, o.MS);
+            writer.WriteStringSbmf(o.MS);
             writer.Write((int)o.E);
             writer.Write(o.B);
             writer.Flush();
@@ -92,7 +102,7 @@ namespace Messages.Extensions
             o.MI64 = reader.ReadInt64();
             o.MF32 = reader.ReadSingle();
             o.MF64 = reader.ReadDouble();
-            o.MS = ReadString(reader);
+            o.MS = reader.ReadStringSbmf();
             o.E = (TestEnum)reader.ReadInt32();
             o.B = reader.ReadBoolean();
         }
@@ -114,13 +124,13 @@ namespace Messages.Extensions
 
         public static void UnmarshalBinary(ref this AliasLists o,BinaryReader reader)
         {
-                o.MI32 = reader.ReadList<MyInteger32>();
-                o.MI64 = reader.ReadList<long>();
-                o.MF32 = reader.ReadList<float>();
-                o.MF64 = reader.ReadList<double>();
+            o.MI32 = reader.ReadList<MyInteger32>();
+            o.MI64 = reader.ReadList<long>();
+            o.MF32 = reader.ReadList<float>();
+            o.MF64 = reader.ReadList<double>();
             o.MS = reader.ReadList<string>();
-                o.E = reader.ReadList<TestEnum>();
-                o.B = reader.ReadList<System.Boolean>();
+            o.E = reader.ReadList<TestEnum>();
+            o.B = reader.ReadList<System.Boolean>();
         }
         public static byte[] MarshalBinary(this Foobar o)
         {
@@ -146,7 +156,7 @@ namespace Messages.Extensions
         {
             MemoryStream ms = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(ms);
-            WriteString(writer, o.S);
+            writer.WriteStringSbmf(o.S);
             writer.Flush();
 
             return ms.ToArray();
@@ -154,7 +164,7 @@ namespace Messages.Extensions
 
         public static void UnmarshalBinary(ref this OneField o,BinaryReader reader)
         {
-            o.S = ReadString(reader);
+            o.S = reader.ReadStringSbmf();
         }
         public static byte[] MarshalBinary(this Primitive o)
         {
@@ -164,7 +174,7 @@ namespace Messages.Extensions
             writer.Write(o.I64);
             writer.Write(o.F32);
             writer.Write(o.F64);
-            WriteString(writer, o.S);
+            writer.WriteStringSbmf(o.S);
             writer.Write(o.B);
             writer.Flush();
 
@@ -177,7 +187,7 @@ namespace Messages.Extensions
             o.I64 = reader.ReadInt64();
             o.F32 = reader.ReadSingle();
             o.F64 = reader.ReadDouble();
-            o.S = ReadString(reader);
+            o.S = reader.ReadStringSbmf();
             o.B = reader.ReadBoolean();
         }
         public static byte[] MarshalBinary(this PrimitiveLists o)
@@ -200,17 +210,66 @@ namespace Messages.Extensions
 
         public static void UnmarshalBinary(ref this PrimitiveLists o,BinaryReader reader)
         {
-                o.I32 = reader.ReadList<int>();
-                o.I64 = reader.ReadList<long>();
-                o.F32 = reader.ReadList<float>();
-                o.F64 = reader.ReadList<double>();
-                o.II32 = reader.ReadList<int[]>();
-                o.II64 = reader.ReadList<long[]>();
+            o.I32 = reader.ReadList<int>();
+            o.I64 = reader.ReadList<long>();
+            o.F32 = reader.ReadList<float>();
+            o.F64 = reader.ReadList<double>();
+            o.II32 = reader.ReadList<int[]>();
+            o.II64 = reader.ReadList<long[]>();
             o.S = reader.ReadList<string>();
             o.S2 = reader.ReadList<string[]>();
-                o.B = reader.ReadList<System.Boolean>();
+            o.B = reader.ReadList<System.Boolean>();
+        }
+        public static byte[] MarshalBinary(this PrimitiveMaps o)
+        {
+            MemoryStream ms = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(ms);
+            writer.WriteMap(o.I32,writer.Write,writer.Write);
+            writer.WriteMap(o.I64,writer.Write,writer.Write);
+            writer.WriteMap(o.F32,writer.Write,writer.Write);
+            writer.WriteMap(o.F64,writer.Write,writer.Write);
+            writer.WriteMap(o.S,writer.WriteStringSbmf,writer.WriteStringSbmf);
+            writer.WriteMap(o.B,writer.Write,writer.Write);
+            writer.WriteMap(o.SI32,writer.WriteStringSbmf,writer.Write);
+            writer.Flush();
+
+            return ms.ToArray();
         }
 
+        public static void UnmarshalBinary(ref this PrimitiveMaps o,BinaryReader reader)
+        {
+            o.I32 = ReadMap(reader, reader.ReadInt32, reader.ReadInt32);
+            o.I64 = ReadMap(reader, reader.ReadInt64, reader.ReadInt64);
+            o.F32 = ReadMap(reader, reader.ReadSingle, reader.ReadSingle);
+            o.F64 = ReadMap(reader, reader.ReadDouble, reader.ReadDouble);
+            o.S = ReadMap(reader, reader.ReadStringSbmf, reader.ReadStringSbmf);
+            o.B = ReadMap(reader, reader.ReadBoolean, reader.ReadBoolean);
+            o.SI32 = ReadMap(reader, reader.ReadStringSbmf, reader.ReadInt32);
+        }
+
+    public static Dictionary<TKey,TValue> ReadMap<TKey,TValue>(BinaryReader reader, Func<TKey> readKey,Func<TValue> readValue)
+    {
+            Dictionary<TKey,TValue> m = new Dictionary<TKey,TValue>();
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                TKey key = readKey();
+                TValue value = readValue();
+                m.Add(key, value);
+            }
+
+            return m;
+    }
+
+    public static void WriteMap<TKey, TValue>(this BinaryWriter writer, Dictionary<TKey, TValue> map, Action<TKey> writeKey,Action<TValue> writeValue)
+    {
+        writer.Write(map.Count);
+        foreach (var item in map)
+        {
+            writeKey(item.Key);
+            writeValue(item.Value);
+        }
+    }
 
     public static void WriteList(this BinaryWriter writer, IEnumerable list)
     {
@@ -242,7 +301,7 @@ namespace Messages.Extensions
             }
             else if(item is string)
             {
-                WriteString(writer, (string)item);
+                writer.WriteStringSbmf((string)item);
             }
             else if(item is bool)
             {
@@ -293,7 +352,7 @@ namespace Messages.Extensions
             }
             else if (typeof(T) == typeof(string))
             {
-                result[i] = (T)(object)ReadString(reader);
+                result[i] = (T)(object)reader.ReadStringSbmf();
             }
             else if (typeof(T) == typeof(bool))
             {
@@ -322,13 +381,13 @@ namespace Messages.Extensions
             return result;
     }
 
-    public static void WriteString(BinaryWriter writer, string value)
+    public static void WriteStringSbmf(this BinaryWriter writer, string value)
     {
         writer.Write(value.Length);
         writer.Write(value.ToCharArray());
     }
 
-    public static string ReadString(BinaryReader reader)
+    public static string ReadStringSbmf(this BinaryReader reader)
     {
         return new string(reader.ReadChars(reader.ReadInt32()));
     }
@@ -349,6 +408,8 @@ namespace Messages.Extensions
                 return 5;
             case Type t when t == typeof(PrimitiveLists):
                 return 6;
+            case Type t when t == typeof(PrimitiveMaps):
+                return 7;
             default:
                 throw new Exception("Unknown message type " + message.GetType());
         }
@@ -376,6 +437,9 @@ namespace Messages.Extensions
             break;
         case Type t when t == typeof(PrimitiveLists):
             writer.Write(((PrimitiveLists)message).MarshalBinary());
+            break;
+        case Type t when t == typeof(PrimitiveMaps):
+            writer.Write(((PrimitiveMaps)message).MarshalBinary());
             break;
         default:
             throw new Exception("Unknown message type " + message.GetType());
@@ -410,6 +474,10 @@ namespace Messages.Extensions
             var msgPrimitiveLists = new PrimitiveLists();
             msgPrimitiveLists.UnmarshalBinary(reader);
             return msgPrimitiveLists;
+            case 7:
+            var msgPrimitiveMaps = new PrimitiveMaps();
+            msgPrimitiveMaps.UnmarshalBinary(reader);
+            return msgPrimitiveMaps;
             default:
                 throw new Exception("Unknown message id " + messageId);
         }

@@ -8,21 +8,23 @@ import (
 "errors"
 "fmt"
 "io"
+"reflect"
 )
 
 var ErrUnknownMessage = errors.New("unknown message")
 
 const (
-// Messages
+    // Messages
     AliasID = int8(1)
     AliasListsID = int8(2)
     FoobarID = int8(3)
     OneFieldID = int8(4)
     PrimitiveID = int8(5)
     PrimitiveListsID = int8(6)
+    PrimitiveMapsID = int8(7)
 )
 const (
-// Enums
+    // Enums
         MyInteger32Value1 MyInteger32 = 1
         MyInteger32Value2 MyInteger32 = 2
         TestEnumValue1 TestEnum = 1
@@ -30,18 +32,18 @@ const (
 )
 
 type (
-// CustomTypes
+    // CustomTypes
+    MyInteger64 int64
     MyString string
     MyBoolean bool
     MyFloat32 float32
     MyFloat64 float64
     MyInteger32 int32
-    MyInteger64 int64
 
-// Enums
+    // Enums
         TestEnum int32
 
-// Messages
+    // Messages
     Alias struct {
         MI32 MyInteger32
         MI64 MyInteger64
@@ -88,14 +90,23 @@ type (
         S2 [][]string
         B []bool
     }
+    PrimitiveMaps struct {
+        I32 map[int32]int32
+        I64 map[int64]int64
+        F32 map[float32]float32
+        F64 map[float64]float64
+        S map[string]string
+        B map[bool]bool
+        SI32 map[string]int32
+    }
 )
 
 func unmarshal(v interface{}, r io.Reader) error {
-switch v := v.(type) {
-case *string:
-return unmarshalString(r, v)
+    switch v := v.(type) {
+    case *string:
+        return unmarshalString(r, v)
 
-// Messages
+    // Messages
     case *Alias:
     return v.UnmarshalBinary(r)
     case *AliasLists:
@@ -108,24 +119,34 @@ return unmarshalString(r, v)
     return v.UnmarshalBinary(r)
     case *PrimitiveLists:
     return v.UnmarshalBinary(r)
+    case *PrimitiveMaps:
+    return v.UnmarshalBinary(r)
 
-// Enums
+    // Enums
     case *TestEnum:
     var i int32
     e := binary.Read(r, binary.LittleEndian, &i)
     if e != nil {
-    return e
+        return fmt.Errorf("err unmarshal TestEnum: %w", e)
     }
     *v = TestEnum(i)
 
     return nil
 
-// CustomTypes
+    // CustomTypes
+    case *MyInteger64:
+    var t int64
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return fmt.Errorf("err unmarshal MyInteger64: %w", e)
+    }
+    *v = MyInteger64(t)
+    return nil
     case *MyString:
     var t string
     var e=unmarshal(&t,r)
     if e != nil {
-    return e
+    return fmt.Errorf("err unmarshal MyString: %w", e)
     }
     *v = MyString(t)
     return nil
@@ -133,7 +154,7 @@ return unmarshalString(r, v)
     var t bool
     var e=unmarshal(&t,r)
     if e != nil {
-    return e
+    return fmt.Errorf("err unmarshal MyBoolean: %w", e)
     }
     *v = MyBoolean(t)
     return nil
@@ -141,7 +162,7 @@ return unmarshalString(r, v)
     var t float32
     var e=unmarshal(&t,r)
     if e != nil {
-    return e
+    return fmt.Errorf("err unmarshal MyFloat32: %w", e)
     }
     *v = MyFloat32(t)
     return nil
@@ -149,7 +170,7 @@ return unmarshalString(r, v)
     var t float64
     var e=unmarshal(&t,r)
     if e != nil {
-    return e
+    return fmt.Errorf("err unmarshal MyFloat64: %w", e)
     }
     *v = MyFloat64(t)
     return nil
@@ -157,20 +178,26 @@ return unmarshalString(r, v)
     var t int32
     var e=unmarshal(&t,r)
     if e != nil {
-    return e
+    return fmt.Errorf("err unmarshal MyInteger32: %w", e)
     }
     *v = MyInteger32(t)
     return nil
-    case *MyInteger64:
-    var t int64
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return e
-    }
-    *v = MyInteger64(t)
-    return nil
 
-// ListTypes
+    // ListTypes
+    case *[]MyInteger32:
+        return unmarshalSlice(r,v)
+    case *[]MyInteger64:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat32:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat64:
+        return unmarshalSlice(r,v)
+    case *[]MyString:
+        return unmarshalSlice(r,v)
+    case *[]TestEnum:
+        return unmarshalSlice(r,v)
+    case *[]MyBoolean:
+        return unmarshalSlice(r,v)
     case *[]int32:
         return unmarshalSlice(r,v)
     case *[]int64:
@@ -189,80 +216,112 @@ return unmarshalString(r, v)
         return unmarshalSlice(r,v)
     case *[]bool:
         return unmarshalSlice(r,v)
-    case *[]MyInteger32:
-        return unmarshalSlice(r,v)
-    case *[]MyInteger64:
-        return unmarshalSlice(r,v)
-    case *[]MyFloat32:
-        return unmarshalSlice(r,v)
-    case *[]MyFloat64:
-        return unmarshalSlice(r,v)
-    case *[]MyString:
-        return unmarshalSlice(r,v)
-    case *[]TestEnum:
-        return unmarshalSlice(r,v)
-    case *[]MyBoolean:
-        return unmarshalSlice(r,v)
 
-default:
-return binary.Read(r, binary.LittleEndian, v)
-}
+    // MapTypes
+    case *map[int32]int32:
+    return unmarshalMap(r,v)
+    case *map[int64]int64:
+    return unmarshalMap(r,v)
+    case *map[float32]float32:
+    return unmarshalMap(r,v)
+    case *map[float64]float64:
+    return unmarshalMap(r,v)
+    case *map[string]string:
+    return unmarshalMap(r,v)
+    case *map[bool]bool:
+    return unmarshalMap(r,v)
+    case *map[string]int32:
+    return unmarshalMap(r,v)
+
+    default:
+     return binary.Read(r, binary.LittleEndian, v)
+    }
 }
 
 func marshal(v interface{}, w io.Writer) error {
-switch v := v.(type) {
-case string:
-return marshalString(w, v)
+    switch v := v.(type) {
+    case string:
+        return marshalString(w, v)
 
-// Messages
+    // Messages
     case Alias:
     d, e := v.MarshalBinary()
     if e != nil {
-    return e
+        return fmt.Errorf("err marshal Alias: %w", e)
     }
     _, e = w.Write(d)
-    return e
+    if e != nil {
+        return fmt.Errorf("err write Alias: %w", e)
+    }
+    return nil
     case AliasLists:
     d, e := v.MarshalBinary()
     if e != nil {
-    return e
+        return fmt.Errorf("err marshal AliasLists: %w", e)
     }
     _, e = w.Write(d)
-    return e
+    if e != nil {
+        return fmt.Errorf("err write AliasLists: %w", e)
+    }
+    return nil
     case Foobar:
     d, e := v.MarshalBinary()
     if e != nil {
-    return e
+        return fmt.Errorf("err marshal Foobar: %w", e)
     }
     _, e = w.Write(d)
-    return e
+    if e != nil {
+        return fmt.Errorf("err write Foobar: %w", e)
+    }
+    return nil
     case OneField:
     d, e := v.MarshalBinary()
     if e != nil {
-    return e
+        return fmt.Errorf("err marshal OneField: %w", e)
     }
     _, e = w.Write(d)
-    return e
+    if e != nil {
+        return fmt.Errorf("err write OneField: %w", e)
+    }
+    return nil
     case Primitive:
     d, e := v.MarshalBinary()
     if e != nil {
-    return e
+        return fmt.Errorf("err marshal Primitive: %w", e)
     }
     _, e = w.Write(d)
-    return e
+    if e != nil {
+        return fmt.Errorf("err write Primitive: %w", e)
+    }
+    return nil
     case PrimitiveLists:
     d, e := v.MarshalBinary()
     if e != nil {
-    return e
+        return fmt.Errorf("err marshal PrimitiveLists: %w", e)
     }
     _, e = w.Write(d)
-    return e
+    if e != nil {
+        return fmt.Errorf("err write PrimitiveLists: %w", e)
+    }
+    return nil
+    case PrimitiveMaps:
+    d, e := v.MarshalBinary()
+    if e != nil {
+        return fmt.Errorf("err marshal PrimitiveMaps: %w", e)
+    }
+    _, e = w.Write(d)
+    if e != nil {
+        return fmt.Errorf("err write PrimitiveMaps: %w", e)
+    }
+    return nil
 
-// Enums
+    // Enums
     case TestEnum:
     return binary.Write(w, binary.LittleEndian, int32(v))
 
-// CustomTypes
+    // CustomTypes
+    case MyInteger64:
+    return marshal(int64(v),w)
     case MyString:
     return marshal(string(v),w)
     case MyBoolean:
@@ -273,24 +332,8 @@ return marshalString(w, v)
     return marshal(float64(v),w)
     case MyInteger32:
     return marshal(int32(v),w)
-    case MyInteger64:
-    return marshal(int64(v),w)
 
-// ListTypes
-    case []MyInteger32:
-    return marshalSlice(w,v)
-    case []MyInteger64:
-    return marshalSlice(w,v)
-    case []MyFloat32:
-    return marshalSlice(w,v)
-    case []MyFloat64:
-    return marshalSlice(w,v)
-    case []MyString:
-    return marshalSlice(w,v)
-    case []TestEnum:
-    return marshalSlice(w,v)
-    case []MyBoolean:
-    return marshalSlice(w,v)
+    // ListTypes
     case []int32:
     return marshalSlice(w,v)
     case []int64:
@@ -309,36 +352,66 @@ return marshalString(w, v)
     return marshalSlice(w,v)
     case []bool:
     return marshalSlice(w,v)
+    case []MyInteger32:
+    return marshalSlice(w,v)
+    case []MyInteger64:
+    return marshalSlice(w,v)
+    case []MyFloat32:
+    return marshalSlice(w,v)
+    case []MyFloat64:
+    return marshalSlice(w,v)
+    case []MyString:
+    return marshalSlice(w,v)
+    case []TestEnum:
+    return marshalSlice(w,v)
+    case []MyBoolean:
+    return marshalSlice(w,v)
 
-default:
-return binary.Write(w, binary.LittleEndian, v)
-}
+    // MapTypes
+    case map[int32]int32:
+    return marshalMap(w,v)
+    case map[int64]int64:
+    return marshalMap(w,v)
+    case map[float32]float32:
+    return marshalMap(w,v)
+    case map[float64]float64:
+    return marshalMap(w,v)
+    case map[string]string:
+    return marshalMap(w,v)
+    case map[bool]bool:
+    return marshalMap(w,v)
+    case map[string]int32:
+    return marshalMap(w,v)
+
+    default:
+        return binary.Write(w, binary.LittleEndian, v)
+    }
 }
 
 // Messages
     func (m *Alias) UnmarshalBinary(r io.Reader) error{
     var e error
-        if e=unmarshal(&m.MI32, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.MI64, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.MF32, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.MF64, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.MS, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.E, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.B, r); e != nil {
-        return e
-        }
+    if e=unmarshal(&m.MI32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MI32: %w", e)
+    }
+    if e=unmarshal(&m.MI64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MI64: %w", e)
+    }
+    if e=unmarshal(&m.MF32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MF32: %w", e)
+    }
+    if e=unmarshal(&m.MF64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MF64: %w", e)
+    }
+    if e=unmarshal(&m.MS, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MS: %w", e)
+    }
+    if e=unmarshal(&m.E, r); e != nil {
+        return fmt.Errorf("err unmarshal m.E: %w", e)
+    }
+    if e=unmarshal(&m.B, r); e != nil {
+        return fmt.Errorf("err unmarshal m.B: %w", e)
+    }
 
     return nil
     }
@@ -347,53 +420,53 @@ return binary.Write(w, binary.LittleEndian, v)
     var data []byte
     w := bytes.NewBuffer(data)
     var e error
-        if e=marshal(m.MI32,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.MI64,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.MF32,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.MF64,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.MS,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.E,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.B,w); e != nil {
-        return nil,e
-        }
+    if e=marshal(m.MI32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MI32: %w", e)
+    }
+    if e=marshal(m.MI64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MI64: %w", e)
+    }
+    if e=marshal(m.MF32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MF32: %w", e)
+    }
+    if e=marshal(m.MF64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MF64: %w", e)
+    }
+    if e=marshal(m.MS,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MS: %w", e)
+    }
+    if e=marshal(m.E,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.E: %w", e)
+    }
+    if e=marshal(m.B,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.B: %w", e)
+    }
 
     return w.Bytes(),nil
     }
     func (m *AliasLists) UnmarshalBinary(r io.Reader) error{
     var e error
-        if e=unmarshal(&m.MI32, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.MI64, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.MF32, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.MF64, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.MS, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.E, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.B, r); e != nil {
-        return e
-        }
+    if e=unmarshal(&m.MI32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MI32: %w", e)
+    }
+    if e=unmarshal(&m.MI64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MI64: %w", e)
+    }
+    if e=unmarshal(&m.MF32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MF32: %w", e)
+    }
+    if e=unmarshal(&m.MF64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MF64: %w", e)
+    }
+    if e=unmarshal(&m.MS, r); e != nil {
+        return fmt.Errorf("err unmarshal m.MS: %w", e)
+    }
+    if e=unmarshal(&m.E, r); e != nil {
+        return fmt.Errorf("err unmarshal m.E: %w", e)
+    }
+    if e=unmarshal(&m.B, r); e != nil {
+        return fmt.Errorf("err unmarshal m.B: %w", e)
+    }
 
     return nil
     }
@@ -402,44 +475,44 @@ return binary.Write(w, binary.LittleEndian, v)
     var data []byte
     w := bytes.NewBuffer(data)
     var e error
-        if e=marshal(m.MI32,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.MI64,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.MF32,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.MF64,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.MS,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.E,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.B,w); e != nil {
-        return nil,e
-        }
+    if e=marshal(m.MI32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MI32: %w", e)
+    }
+    if e=marshal(m.MI64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MI64: %w", e)
+    }
+    if e=marshal(m.MF32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MF32: %w", e)
+    }
+    if e=marshal(m.MF64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MF64: %w", e)
+    }
+    if e=marshal(m.MS,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.MS: %w", e)
+    }
+    if e=marshal(m.E,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.E: %w", e)
+    }
+    if e=marshal(m.B,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.B: %w", e)
+    }
 
     return w.Bytes(),nil
     }
     func (m *Foobar) UnmarshalBinary(r io.Reader) error{
     var e error
-        if e=unmarshal(&m.A, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.P, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.AL, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.PL, r); e != nil {
-        return e
-        }
+    if e=unmarshal(&m.A, r); e != nil {
+        return fmt.Errorf("err unmarshal m.A: %w", e)
+    }
+    if e=unmarshal(&m.P, r); e != nil {
+        return fmt.Errorf("err unmarshal m.P: %w", e)
+    }
+    if e=unmarshal(&m.AL, r); e != nil {
+        return fmt.Errorf("err unmarshal m.AL: %w", e)
+    }
+    if e=unmarshal(&m.PL, r); e != nil {
+        return fmt.Errorf("err unmarshal m.PL: %w", e)
+    }
 
     return nil
     }
@@ -448,26 +521,26 @@ return binary.Write(w, binary.LittleEndian, v)
     var data []byte
     w := bytes.NewBuffer(data)
     var e error
-        if e=marshal(m.A,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.P,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.AL,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.PL,w); e != nil {
-        return nil,e
-        }
+    if e=marshal(m.A,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.A: %w", e)
+    }
+    if e=marshal(m.P,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.P: %w", e)
+    }
+    if e=marshal(m.AL,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.AL: %w", e)
+    }
+    if e=marshal(m.PL,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.PL: %w", e)
+    }
 
     return w.Bytes(),nil
     }
     func (m *OneField) UnmarshalBinary(r io.Reader) error{
     var e error
-        if e=unmarshal(&m.S, r); e != nil {
-        return e
-        }
+    if e=unmarshal(&m.S, r); e != nil {
+        return fmt.Errorf("err unmarshal m.S: %w", e)
+    }
 
     return nil
     }
@@ -476,32 +549,32 @@ return binary.Write(w, binary.LittleEndian, v)
     var data []byte
     w := bytes.NewBuffer(data)
     var e error
-        if e=marshal(m.S,w); e != nil {
-        return nil,e
-        }
+    if e=marshal(m.S,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.S: %w", e)
+    }
 
     return w.Bytes(),nil
     }
     func (m *Primitive) UnmarshalBinary(r io.Reader) error{
     var e error
-        if e=unmarshal(&m.I32, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.I64, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.F32, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.F64, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.S, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.B, r); e != nil {
-        return e
-        }
+    if e=unmarshal(&m.I32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.I32: %w", e)
+    }
+    if e=unmarshal(&m.I64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.I64: %w", e)
+    }
+    if e=unmarshal(&m.F32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.F32: %w", e)
+    }
+    if e=unmarshal(&m.F64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.F64: %w", e)
+    }
+    if e=unmarshal(&m.S, r); e != nil {
+        return fmt.Errorf("err unmarshal m.S: %w", e)
+    }
+    if e=unmarshal(&m.B, r); e != nil {
+        return fmt.Errorf("err unmarshal m.B: %w", e)
+    }
 
     return nil
     }
@@ -510,56 +583,56 @@ return binary.Write(w, binary.LittleEndian, v)
     var data []byte
     w := bytes.NewBuffer(data)
     var e error
-        if e=marshal(m.I32,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.I64,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.F32,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.F64,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.S,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.B,w); e != nil {
-        return nil,e
-        }
+    if e=marshal(m.I32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.I32: %w", e)
+    }
+    if e=marshal(m.I64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.I64: %w", e)
+    }
+    if e=marshal(m.F32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.F32: %w", e)
+    }
+    if e=marshal(m.F64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.F64: %w", e)
+    }
+    if e=marshal(m.S,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.S: %w", e)
+    }
+    if e=marshal(m.B,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.B: %w", e)
+    }
 
     return w.Bytes(),nil
     }
     func (m *PrimitiveLists) UnmarshalBinary(r io.Reader) error{
     var e error
-        if e=unmarshal(&m.I32, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.I64, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.F32, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.F64, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.II32, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.II64, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.S, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.S2, r); e != nil {
-        return e
-        }
-        if e=unmarshal(&m.B, r); e != nil {
-        return e
-        }
+    if e=unmarshal(&m.I32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.I32: %w", e)
+    }
+    if e=unmarshal(&m.I64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.I64: %w", e)
+    }
+    if e=unmarshal(&m.F32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.F32: %w", e)
+    }
+    if e=unmarshal(&m.F64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.F64: %w", e)
+    }
+    if e=unmarshal(&m.II32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.II32: %w", e)
+    }
+    if e=unmarshal(&m.II64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.II64: %w", e)
+    }
+    if e=unmarshal(&m.S, r); e != nil {
+        return fmt.Errorf("err unmarshal m.S: %w", e)
+    }
+    if e=unmarshal(&m.S2, r); e != nil {
+        return fmt.Errorf("err unmarshal m.S2: %w", e)
+    }
+    if e=unmarshal(&m.B, r); e != nil {
+        return fmt.Errorf("err unmarshal m.B: %w", e)
+    }
 
     return nil
     }
@@ -568,105 +641,160 @@ return binary.Write(w, binary.LittleEndian, v)
     var data []byte
     w := bytes.NewBuffer(data)
     var e error
-        if e=marshal(m.I32,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.I64,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.F32,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.F64,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.II32,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.II64,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.S,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.S2,w); e != nil {
-        return nil,e
-        }
-        if e=marshal(m.B,w); e != nil {
-        return nil,e
-        }
+    if e=marshal(m.I32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.I32: %w", e)
+    }
+    if e=marshal(m.I64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.I64: %w", e)
+    }
+    if e=marshal(m.F32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.F32: %w", e)
+    }
+    if e=marshal(m.F64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.F64: %w", e)
+    }
+    if e=marshal(m.II32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.II32: %w", e)
+    }
+    if e=marshal(m.II64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.II64: %w", e)
+    }
+    if e=marshal(m.S,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.S: %w", e)
+    }
+    if e=marshal(m.S2,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.S2: %w", e)
+    }
+    if e=marshal(m.B,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.B: %w", e)
+    }
+
+    return w.Bytes(),nil
+    }
+    func (m *PrimitiveMaps) UnmarshalBinary(r io.Reader) error{
+    var e error
+    if e=unmarshal(&m.I32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.I32: %w", e)
+    }
+    if e=unmarshal(&m.I64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.I64: %w", e)
+    }
+    if e=unmarshal(&m.F32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.F32: %w", e)
+    }
+    if e=unmarshal(&m.F64, r); e != nil {
+        return fmt.Errorf("err unmarshal m.F64: %w", e)
+    }
+    if e=unmarshal(&m.S, r); e != nil {
+        return fmt.Errorf("err unmarshal m.S: %w", e)
+    }
+    if e=unmarshal(&m.B, r); e != nil {
+        return fmt.Errorf("err unmarshal m.B: %w", e)
+    }
+    if e=unmarshal(&m.SI32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.SI32: %w", e)
+    }
+
+    return nil
+    }
+
+    func (m *PrimitiveMaps) MarshalBinary() ([]byte, error) {
+    var data []byte
+    w := bytes.NewBuffer(data)
+    var e error
+    if e=marshal(m.I32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.I32: %w", e)
+    }
+    if e=marshal(m.I64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.I64: %w", e)
+    }
+    if e=marshal(m.F32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.F32: %w", e)
+    }
+    if e=marshal(m.F64,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.F64: %w", e)
+    }
+    if e=marshal(m.S,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.S: %w", e)
+    }
+    if e=marshal(m.B,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.B: %w", e)
+    }
+    if e=marshal(m.SI32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.SI32: %w", e)
+    }
 
     return w.Bytes(),nil
     }
 
 
 func marshalSlice[T any](w io.Writer, v []T) error {
-var length = int32(len(v))
-if e := binary.Write(w, binary.LittleEndian, length); e != nil {
-return e
-}
-for i := int32(0); i < length; i++ {
-switch vt := any(v[i]).(type) {
-case string:
-e := marshal(int32(len(vt)),w)
-if e != nil {
-return e
-}
-_,e = w.Write([]byte(vt))
-if e != nil {
-return e
-}
-default:
-if e := marshal(vt, w); e != nil {
-return e
-}
-}
-}
+    var length = int32(len(v))
+    if e := binary.Write(w, binary.LittleEndian, length); e != nil {
+        return e
+    }
+    for i := int32(0); i < length; i++ {
+        switch vt := any(v[i]).(type) {
+        case string:
+            e := marshal(int32(len(vt)),w)
+            if e != nil {
+                return fmt.Errorf("err marshal string length: %w", e)
+            }
+            _,e = w.Write([]byte(vt))
+            if e != nil {
+                return fmt.Errorf("err marshal string: %w", e)
+            }
+        default:
+            if e := marshal(vt, w); e != nil {
+                return fmt.Errorf("err marshal slice: %w", e)
+            }
+        }
+    }
 
-return nil
+    return nil
 }
 
 func unmarshalSlice[T any](r io.Reader, v *[]T) error {
-var length int32
-if e := binary.Read(r, binary.LittleEndian, &length); e != nil {
-return e
-}
-*v = make([]T, length)
-for i := 0; i < int(length); i++ {
-if e := unmarshal(&(*v)[i], r); e != nil {
-return e
-}
-}
+    var length int32
+    if e := binary.Read(r, binary.LittleEndian, &length); e != nil {
+        return fmt.Errorf("err unmarshal slice length: %w", e)
+    }
+    *v = make([]T, length)
+    for i := 0; i < int(length); i++ {
+        if e := unmarshal(&(*v)[i], r); e != nil {
+            return fmt.Errorf("err unmarshal slice (len=%d): %w", length, e)
+        }
+    }
 
-return nil
+    return nil
 }
 
 func unmarshalString(r io.Reader, v *string) error {
-var l int32
-if e := binary.Read(r, binary.LittleEndian, &l); e != nil {
-return e
-}
+    var l int32
+    if e := binary.Read(r, binary.LittleEndian, &l); e != nil {
+        return  fmt.Errorf("err read string length: %w", e)
+    }
 
-var b = make([]byte, l)
-e := binary.Read(r, binary.LittleEndian, &b)
-if e != nil {
-return e
-}
-*v = string(b)
+    var b = make([]byte, l)
+    e := binary.Read(r, binary.LittleEndian, &b)
+    if e != nil {
+        return  fmt.Errorf("err read string value (len=%v): %w",l, e)
+    }
+    *v = string(b)
 
-return nil
+    return nil
 }
 
 func marshalString(w io.Writer, v string) error {
-if e := binary.Write(w, binary.LittleEndian, int32(len(v))); e != nil {
-return e
-}
-_, e := w.Write([]byte(v))
-if e != nil {
-return e
-}
+    if e := binary.Write(w, binary.LittleEndian, int32(len(v))); e != nil {
+        return fmt.Errorf("err write string length: %w", e)
+    }
+    _, e := w.Write([]byte(v))
+    if e != nil {
+        return fmt.Errorf("err write string value (len=%v): %w",len(v), e)
+    }
 
-return nil
+    return nil
 }
 
 func WriteMessage(w io.Writer, m interface{}) error {
@@ -684,6 +812,8 @@ var messageID int8
         messageID = PrimitiveID
         case PrimitiveLists:
         messageID = PrimitiveListsID
+        case PrimitiveMaps:
+        messageID = PrimitiveMapsID
     }
 
     if messageID == 0 {
@@ -691,7 +821,7 @@ var messageID int8
     }
 
     if e :=binary.Write(w, binary.LittleEndian, messageID); e != nil {
-        return e
+        return fmt.Errorf("err write message id: %w", e)
     }
 
     return marshal(m, w)
@@ -700,44 +830,50 @@ var messageID int8
 func ReadMessage(r io.Reader) (interface{}, error) {
     var id int8
     if e := binary.Read(r, binary.LittleEndian, &id); e != nil {
-        return nil, e
+        return nil, fmt.Errorf("err read message id: %w", e)
     }
 
     switch id {
         case AliasID:
         var m Alias
         if e := unmarshal(&m, r); e != nil {
-            return nil, e
+            return nil, fmt.Errorf("err unmarshal Alias: %w", e)
         }
         return m, nil
         case AliasListsID:
         var m AliasLists
         if e := unmarshal(&m, r); e != nil {
-            return nil, e
+            return nil, fmt.Errorf("err unmarshal AliasLists: %w", e)
         }
         return m, nil
         case FoobarID:
         var m Foobar
         if e := unmarshal(&m, r); e != nil {
-            return nil, e
+            return nil, fmt.Errorf("err unmarshal Foobar: %w", e)
         }
         return m, nil
         case OneFieldID:
         var m OneField
         if e := unmarshal(&m, r); e != nil {
-            return nil, e
+            return nil, fmt.Errorf("err unmarshal OneField: %w", e)
         }
         return m, nil
         case PrimitiveID:
         var m Primitive
         if e := unmarshal(&m, r); e != nil {
-            return nil, e
+            return nil, fmt.Errorf("err unmarshal Primitive: %w", e)
         }
         return m, nil
         case PrimitiveListsID:
         var m PrimitiveLists
         if e := unmarshal(&m, r); e != nil {
-            return nil, e
+            return nil, fmt.Errorf("err unmarshal PrimitiveLists: %w", e)
+        }
+        return m, nil
+        case PrimitiveMapsID:
+        var m PrimitiveMaps
+        if e := unmarshal(&m, r); e != nil {
+            return nil, fmt.Errorf("err unmarshal PrimitiveMaps: %w", e)
         }
         return m, nil
     }
@@ -748,12 +884,12 @@ func ReadMessage(r io.Reader) (interface{}, error) {
 func ReadPacket(r io.Reader) (interface{}, error) {
     var length int32
     if e := binary.Read(r, binary.LittleEndian, &length); e != nil {
-        return nil, e
+        return nil, fmt.Errorf("err read packet length: %w", e)
     }
 
     var data = make([]byte, length)
     if e := binary.Read(r, binary.LittleEndian, &data); e != nil {
-        return nil, e
+        return nil, fmt.Errorf("err read packet data (len=%v): %w",length, e)
     }
 
     return ReadMessage(bytes.NewReader(data))
@@ -763,16 +899,20 @@ func WritePacket(w io.Writer, m interface{}) error {
     var data []byte
     var buffer = bytes.NewBuffer(data)
     if e := WriteMessage(buffer, m); e != nil {
-        return e
+        return fmt.Errorf("err write message: %w", e)
     }
 
     var length = int32(buffer.Len())
     if e := binary.Write(w, binary.LittleEndian, length); e != nil {
-        return e
+        return fmt.Errorf("err write packet length: %w", e)
     }
 
     _, e := w.Write(buffer.Bytes())
-    return e
+    if e != nil{
+        return fmt.Errorf("err write packet data (len=%v): %w",length, e)
+    }
+
+    return nil
 }
 
 type PacketReader struct {
@@ -783,18 +923,18 @@ type PacketReader struct {
 func (pr *PacketReader) Read(r io.Reader) (interface{}, error) {
     data, err := io.ReadAll(r)
     if err != nil {
-        return nil, err
+        return nil, fmt.Errorf("err read packet: %w", err)
     }
 
     _, err = pr.Write(data)
     if err != nil {
-        return nil, err
+        return nil, fmt.Errorf("err write packet: %w", err)
     }
 
     if pr.nextPacketLength == 0 && pr.Len() >= 4 {
         var length int32
         if err = binary.Read(&pr.Buffer, binary.LittleEndian, &length); err != nil {
-            return nil, err
+            return nil, fmt.Errorf("err read packet length: %w", err)
         }
         pr.nextPacketLength = length
     }
@@ -802,7 +942,7 @@ func (pr *PacketReader) Read(r io.Reader) (interface{}, error) {
     if pr.nextPacketLength > 0 && int32(pr.Len()) >= pr.nextPacketLength {
         var messageData = make([]byte, pr.nextPacketLength)
         if e := binary.Read(&pr.Buffer, binary.LittleEndian, &messageData); e != nil {
-            return nil, e
+            return nil, fmt.Errorf("err read packet data (len=%v): %w",pr.nextPacketLength, e)
         }
         pr.nextPacketLength = 0
         return ReadMessage(bytes.NewReader(messageData))
@@ -811,3 +951,53 @@ func (pr *PacketReader) Read(r io.Reader) (interface{}, error) {
     return nil, nil
 }
 
+
+func marshalMap(w io.Writer, mapValue interface{}) error {
+    var mapValueReflect = reflect.ValueOf(mapValue)
+    var mapLength = mapValueReflect.Len()
+    if e := binary.Write(w, binary.LittleEndian, int32(mapLength)); e != nil {
+        return fmt.Errorf("err write map length: %w", e)
+    }
+
+    for _, key := range mapValueReflect.MapKeys() {
+        var value = mapValueReflect.MapIndex(key)
+        if e := marshal(key.Interface(), w); e != nil {
+            return fmt.Errorf("err marshal map key: %w", e)
+        }
+        if e := marshal(value.Interface(), w); e != nil {
+            return fmt.Errorf("err marshal map value: %w", e)
+        }
+    }
+
+    return nil
+}
+
+func unmarshalMap(r io.Reader, mp interface{}) error {
+    var rmp = reflect.ValueOf(mp)
+    var mapReflect = reflect.ValueOf(rmp.Elem().Interface())
+    var mapType = mapReflect.Type()
+
+    mapValue := reflect.MakeMapWithSize(mapReflect.Type(), 0)
+
+    var mapLength int32
+    if e := binary.Read(r, binary.LittleEndian, &mapLength); e != nil {
+        return fmt.Errorf("err read map length: %w", e)
+    }
+
+    for i := 0; i < int(mapLength); i++ {
+        var key = reflect.New(mapType.Key()).Interface()
+        if e := unmarshal(key, r); e != nil {
+            return fmt.Errorf("err unmarshal map key: %w", e)
+        }
+
+        var value = reflect.New(mapType.Elem()).Interface()
+        if e := unmarshal(value, r); e != nil {
+            return fmt.Errorf("err unmarshal map value: %w", e)
+        }
+        mapValue.SetMapIndex(reflect.ValueOf(key).Elem(), reflect.ValueOf(value).Elem())
+    }
+
+    rmp.Elem().Set(mapValue)
+
+    return nil
+}

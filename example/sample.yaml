@@ -5,7 +5,7 @@ attributes:
   go:
     output: /home/nils/go/src/github.com/Oppodelldog/sbmf/example/go/messages.go
     package: data
-  version: 176
+  version: 253
 enums:
   MyInteger32:
   - Value1: 1
@@ -31,6 +31,14 @@ messages:
   - S: <str>
   - S2: <<str>>
   - B: <bool>
+- PrimitiveMaps:
+  - I32: <i32, i32>
+  - I64: <i64, i64>
+  - F32: <f32, f32>
+  - F64: <f64, f64>
+  - S: <str, str>
+  - B: <bool, bool>
+  - SI32: <str, i32>
 - Alias:
   - MI32: MyInteger32
   - MI64: MyInteger64

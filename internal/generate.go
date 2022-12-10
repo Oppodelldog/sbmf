@@ -80,11 +80,11 @@ func Generate(file string) {
 			case "types":
 				var internalTypes = map[string]string{}
 				for k2, v2 := range v1.(map[interface{}]interface{}) {
-					gen.addType(TypeDef{Name: k2.(string), Type: v2.(string)})
+					gen.addType(newTypeDef(k2.(string), v2.(string)))
 					internalTypes[v2.(string)] = v2.(string)
 				}
 				for internalType := range internalTypes {
-					gen.AddInternalType(TypeDef{Name: internalType, Type: goType(internalType)})
+					gen.AddInternalType(newTypeDef(internalType, internalType))
 				}
 
 			case "enums":
@@ -130,8 +130,11 @@ func newTypeDef(name, t string) TypeDef {
 		var parts = strings.Split(t, ",")
 		t = parts[1]
 		dictKey = parts[0]
+		dim--
 	}
 
+	name = strings.TrimSpace(name)
+	t = strings.TrimSpace(t)
 	return TypeDef{Name: name, Type: t, DictKey: dictKey, Dim: dim}
 }
 
