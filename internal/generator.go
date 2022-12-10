@@ -133,7 +133,7 @@ func (g *Generator) hasType(s string) bool {
 }
 
 func (g *Generator) listTypes() []TypeDef {
-	var types map[string]TypeDef = make(map[string]TypeDef)
+	var types = make(map[string]TypeDef)
 	for _, t := range g.InternalTypes {
 		if t.Dim > 0 {
 			var key = fmt.Sprintf("%s%s%v", t.Type, t.DictKey, t.Dim)
@@ -157,20 +157,26 @@ func (g *Generator) listTypes() []TypeDef {
 }
 
 func (g *Generator) mapTypes() []TypeDef {
-	var types []TypeDef
+	var types = make(map[string]TypeDef)
 	for _, t := range g.InternalTypes {
 		if t.DictKey != "" {
-			types = append(types, t)
+			var key = fmt.Sprintf("%s%s%v", t.Type, t.DictKey, t.Dim)
+			types[key] = t
 		}
 	}
 	for _, t := range g.Messages {
 		for _, f := range t {
 			if f.DictKey != "" {
-				types = append(types, f)
+				var key = fmt.Sprintf("%s%s%v", f.Type, f.DictKey, f.Dim)
+				types[key] = f
 			}
 		}
 	}
-	return types
+	var res []TypeDef
+	for _, v := range types {
+		res = append(res, v)
+	}
+	return res
 }
 
 func (g *Generator) isCustomType(t string) bool {

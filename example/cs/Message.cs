@@ -73,6 +73,7 @@ namespace Messages
         public Dictionary<System.String, string> S;
         public Dictionary<System.Boolean, System.Boolean> B;
         public Dictionary<System.String, int> SI32;
+        public Dictionary<System.String, int> SI323;
     }
 }
 
@@ -231,6 +232,7 @@ namespace Messages.Extensions
             writer.WriteMap(o.S,writer.WriteStringSbmf,writer.WriteStringSbmf);
             writer.WriteMap(o.B,writer.Write,writer.Write);
             writer.WriteMap(o.SI32,writer.WriteStringSbmf,writer.Write);
+            writer.WriteMap(o.SI323,writer.WriteStringSbmf,writer.Write);
             writer.Flush();
 
             return ms.ToArray();
@@ -245,6 +247,7 @@ namespace Messages.Extensions
             o.S = ReadMap(reader, reader.ReadStringSbmf, reader.ReadStringSbmf);
             o.B = ReadMap(reader, reader.ReadBoolean, reader.ReadBoolean);
             o.SI32 = ReadMap(reader, reader.ReadStringSbmf, reader.ReadInt32);
+            o.SI323 = ReadMap(reader, reader.ReadStringSbmf, reader.ReadInt32);
         }
 
     public static Dictionary<TKey,TValue> ReadMap<TKey,TValue>(BinaryReader reader, Func<TKey> readKey,Func<TValue> readValue)
