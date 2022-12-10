@@ -73,7 +73,7 @@ namespace Messages
         public Dictionary<System.String, string> S;
         public Dictionary<System.Boolean, System.Boolean> B;
         public Dictionary<System.String, int> SI32;
-        public Dictionary<System.String, int> SI323;
+        public Dictionary<System.String, int[]> SII32;
     }
 }
 
@@ -232,7 +232,7 @@ namespace Messages.Extensions
             writer.WriteMap(o.S,writer.WriteStringSbmf,writer.WriteStringSbmf);
             writer.WriteMap(o.B,writer.Write,writer.Write);
             writer.WriteMap(o.SI32,writer.WriteStringSbmf,writer.Write);
-            writer.WriteMap(o.SI323,writer.WriteStringSbmf,writer.Write);
+            writer.WriteMap(o.SII32,writer.WriteStringSbmf,writer.WriteList);
             writer.Flush();
 
             return ms.ToArray();
@@ -240,14 +240,14 @@ namespace Messages.Extensions
 
         public static void UnmarshalBinary(ref this PrimitiveMaps o,BinaryReader reader)
         {
-            o.I32 = ReadMap(reader, reader.ReadInt32, reader.ReadInt32);
-            o.I64 = ReadMap(reader, reader.ReadInt64, reader.ReadInt64);
-            o.F32 = ReadMap(reader, reader.ReadSingle, reader.ReadSingle);
-            o.F64 = ReadMap(reader, reader.ReadDouble, reader.ReadDouble);
-            o.S = ReadMap(reader, reader.ReadStringSbmf, reader.ReadStringSbmf);
-            o.B = ReadMap(reader, reader.ReadBoolean, reader.ReadBoolean);
-            o.SI32 = ReadMap(reader, reader.ReadStringSbmf, reader.ReadInt32);
-            o.SI323 = ReadMap(reader, reader.ReadStringSbmf, reader.ReadInt32);
+            o.I32 = ReadMap(reader, reader.ReadInt32,reader.ReadInt32);
+            o.I64 = ReadMap(reader, reader.ReadInt64,reader.ReadInt64);
+            o.F32 = ReadMap(reader, reader.ReadSingle,reader.ReadSingle);
+            o.F64 = ReadMap(reader, reader.ReadDouble,reader.ReadDouble);
+            o.S = ReadMap(reader, reader.ReadStringSbmf,reader.ReadStringSbmf);
+            o.B = ReadMap(reader, reader.ReadBoolean,reader.ReadBoolean);
+            o.SI32 = ReadMap(reader, reader.ReadStringSbmf,reader.ReadInt32);
+            o.SII32 = ReadMap(reader, reader.ReadStringSbmf,reader.ReadList<int>);
         }
 
     public static Dictionary<TKey,TValue> ReadMap<TKey,TValue>(BinaryReader reader, Func<TKey> readKey,Func<TValue> readValue)

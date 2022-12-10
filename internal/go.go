@@ -55,14 +55,13 @@ func goTemplate(g *Generator) (*template.Template, error) {
 			},
 			"typeDef": func(typeDef TypeDef) string {
 				t := g.MapMessageType(typeDef.Type)
-				if typeDef.Dim > 0 {
-					return strings.Repeat("[]", typeDef.Dim) + t
-				}
+
 				if typeDef.DictKey != "" {
 					var k = g.MapMessageType(typeDef.DictKey)
-					return "map[" + k + "]" + t
+					return "map[" + k + "]" + strings.Repeat("[]", typeDef.Dim) + t
+				} else if typeDef.Dim > 0 {
+					return strings.Repeat("[]", typeDef.Dim) + t
 				}
-
 				return t
 			},
 			"listTypes":     g.listTypes,

@@ -98,7 +98,7 @@ type (
         S map[string]string
         B map[bool]bool
         SI32 map[string]int32
-        SI323 map[string]int32
+        SII32 map[string][]int32
     }
 )
 
@@ -185,40 +185,42 @@ func unmarshal(v interface{}, r io.Reader) error {
     return nil
 
     // ListTypes
-    case *[]bool:
-        return unmarshalSlice(r,v)
-    case *[]MyBoolean:
-        return unmarshalSlice(r,v)
-    case *[]float32:
-        return unmarshalSlice(r,v)
-    case *[][]int64:
-        return unmarshalSlice(r,v)
-    case *[]string:
-        return unmarshalSlice(r,v)
-    case *[]MyInteger64:
-        return unmarshalSlice(r,v)
-    case *[]MyFloat32:
-        return unmarshalSlice(r,v)
-    case *[]MyFloat64:
-        return unmarshalSlice(r,v)
-    case *[]int32:
-        return unmarshalSlice(r,v)
-    case *[]int64:
-        return unmarshalSlice(r,v)
     case *[]float64:
-        return unmarshalSlice(r,v)
-    case *[][]string:
-        return unmarshalSlice(r,v)
-    case *[]MyInteger32:
-        return unmarshalSlice(r,v)
-    case *[]TestEnum:
         return unmarshalSlice(r,v)
     case *[][]int32:
         return unmarshalSlice(r,v)
+    case *[][]int64:
+        return unmarshalSlice(r,v)
+    case *[]MyInteger32:
+        return unmarshalSlice(r,v)
+    case *[]MyInteger64:
+        return unmarshalSlice(r,v)
     case *[]MyString:
+        return unmarshalSlice(r,v)
+    case *[]int32:
+        return unmarshalSlice(r,v)
+    case *[]float32:
+        return unmarshalSlice(r,v)
+    case *[]string:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat64:
+        return unmarshalSlice(r,v)
+    case *[]MyBoolean:
+        return unmarshalSlice(r,v)
+    case *[][]string:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat32:
+        return unmarshalSlice(r,v)
+    case *[]TestEnum:
+        return unmarshalSlice(r,v)
+    case *[]int64:
+        return unmarshalSlice(r,v)
+    case *[]bool:
         return unmarshalSlice(r,v)
 
     // MapTypes
+    case *map[string][]int32:
+    return unmarshalMap(r,v)
     case *map[int32]int32:
     return unmarshalMap(r,v)
     case *map[int64]int64:
@@ -335,13 +337,29 @@ func marshal(v interface{}, w io.Writer) error {
     return marshal(string(v),w)
 
     // ListTypes
-    case []MyInteger32:
-    return marshalSlice(w,v)
     case []MyInteger64:
     return marshalSlice(w,v)
     case []MyFloat32:
     return marshalSlice(w,v)
+    case []float64:
+    return marshalSlice(w,v)
+    case [][]int64:
+    return marshalSlice(w,v)
+    case []MyInteger32:
+    return marshalSlice(w,v)
+    case []float32:
+    return marshalSlice(w,v)
+    case [][]string:
+    return marshalSlice(w,v)
+    case []bool:
+    return marshalSlice(w,v)
     case []MyFloat64:
+    return marshalSlice(w,v)
+    case []int64:
+    return marshalSlice(w,v)
+    case []string:
+    return marshalSlice(w,v)
+    case [][]int32:
     return marshalSlice(w,v)
     case []MyString:
     return marshalSlice(w,v)
@@ -349,26 +367,16 @@ func marshal(v interface{}, w io.Writer) error {
     return marshalSlice(w,v)
     case []MyBoolean:
     return marshalSlice(w,v)
-    case []string:
-    return marshalSlice(w,v)
-    case []float32:
-    return marshalSlice(w,v)
-    case []bool:
-    return marshalSlice(w,v)
-    case []int64:
-    return marshalSlice(w,v)
-    case []float64:
-    return marshalSlice(w,v)
-    case [][]int32:
-    return marshalSlice(w,v)
-    case [][]int64:
-    return marshalSlice(w,v)
-    case [][]string:
-    return marshalSlice(w,v)
     case []int32:
     return marshalSlice(w,v)
 
     // MapTypes
+    case map[int32]int32:
+    return marshalMap(w,v)
+    case map[int64]int64:
+    return marshalMap(w,v)
+    case map[float32]float32:
+    return marshalMap(w,v)
     case map[float64]float64:
     return marshalMap(w,v)
     case map[string]string:
@@ -377,11 +385,7 @@ func marshal(v interface{}, w io.Writer) error {
     return marshalMap(w,v)
     case map[string]int32:
     return marshalMap(w,v)
-    case map[int32]int32:
-    return marshalMap(w,v)
-    case map[int64]int64:
-    return marshalMap(w,v)
-    case map[float32]float32:
+    case map[string][]int32:
     return marshalMap(w,v)
 
     default:
@@ -695,8 +699,8 @@ func marshal(v interface{}, w io.Writer) error {
     if e=unmarshal(&m.SI32, r); e != nil {
         return fmt.Errorf("err unmarshal m.SI32: %w", e)
     }
-    if e=unmarshal(&m.SI323, r); e != nil {
-        return fmt.Errorf("err unmarshal m.SI323: %w", e)
+    if e=unmarshal(&m.SII32, r); e != nil {
+        return fmt.Errorf("err unmarshal m.SII32: %w", e)
     }
 
     return nil
@@ -727,8 +731,8 @@ func marshal(v interface{}, w io.Writer) error {
     if e=marshal(m.SI32,w); e != nil {
         return nil, fmt.Errorf("err marshal m.SI32: %w", e)
     }
-    if e=marshal(m.SI323,w); e != nil {
-        return nil, fmt.Errorf("err marshal m.SI323: %w", e)
+    if e=marshal(m.SII32,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.SII32: %w", e)
     }
 
     return w.Bytes(),nil

@@ -146,14 +146,12 @@ func csharpTemplate(g *Generator) (*template.Template, error) {
 				t = internalTypeToCS(typeDef.Type)
 			}
 
-			if typeDef.Dim > 0 {
-				return t + strings.Repeat("[]", typeDef.Dim)
-			}
 			if typeDef.DictKey != "" {
 				var k = g.MapAliasType(typeDef.DictKey)
-				return "Dictionary<" + k + ", " + t + ">"
+				return "Dictionary<" + k + ", " + t + strings.Repeat("[]", typeDef.Dim) + ">"
+			} else if typeDef.Dim > 0 {
+				return t + strings.Repeat("[]", typeDef.Dim)
 			}
-
 			return t
 		},
 	})

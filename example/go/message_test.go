@@ -147,13 +147,14 @@ func TestAliasLists(t *testing.T) {
 
 func TestPrimitiveMaps(t *testing.T) {
 	foo := PrimitiveMaps{
-		I32:  map[int32]int32{math.MinInt32: 1, 2: math.MaxInt32},
-		I64:  map[int64]int64{math.MinInt64: 3, 4: math.MaxInt64},
-		F32:  map[float32]float32{float32Min: 5.5, 6.6: math.MaxFloat32},
-		F64:  map[float64]float64{float64Min: 7.7, 8.8: math.MaxFloat64},
-		S:    map[string]string{"hello": "world", "you": "are"},
-		B:    map[bool]bool{true: false, false: true},
-		SI32: map[string]int32{"one": 1, "two": 2, "three": 3},
+		I32:   map[int32]int32{math.MinInt32: 1, 2: math.MaxInt32},
+		I64:   map[int64]int64{math.MinInt64: 3, 4: math.MaxInt64},
+		F32:   map[float32]float32{float32Min: 5.5, 6.6: math.MaxFloat32},
+		F64:   map[float64]float64{float64Min: 7.7, 8.8: math.MaxFloat64},
+		S:     map[string]string{"hello": "world", "you": "are"},
+		B:     map[bool]bool{true: false, false: true},
+		SI32:  map[string]int32{"one": 1, "two": 2, "three": 3},
+		SII32: map[string][]int32{"twenties": {20, 21, 22}, "thirties": {30, 31, 32}},
 	}
 
 	d, err := foo.MarshalBinary()
@@ -173,8 +174,9 @@ func TestPrimitiveMaps(t *testing.T) {
 	assertMapsEqual(t, foo2.F32, foo.F32)
 	assertMapsEqual(t, foo2.F64, foo.F64)
 	assertMapsEqual(t, foo2.S, foo.S)
-	assertMapsEqual(t, foo2.SI32, foo.SI32)
 	assertMapsEqual(t, foo2.B, foo.B)
+	assertMapsEqual(t, foo2.SI32, foo.SI32)
+	assertMapsEqual(t, foo2.SII32, foo.SII32)
 }
 
 func TestFooBar(t *testing.T) {
@@ -362,6 +364,7 @@ func TestCrossLanguagePrimitiveMaps(t *testing.T) {
 	assertMapsEqual(t, pm.S, map[string]string{"hello": "world", "you": "are"})
 	assertMapsEqual(t, pm.B, map[bool]bool{true: false, false: true})
 	assertMapsEqual(t, pm.SI32, map[string]int32{"hello": 1, "world": 2})
+	assertMapsEqual(t, pm.SII32, map[string][]int32{"twenties": {20, 21, 22}, "thirties": {30, 31, 32}})
 }
 
 func TestCrossLanguageAliasList(t *testing.T) {

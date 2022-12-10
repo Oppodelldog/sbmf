@@ -39,7 +39,7 @@ namespace {{ .Namespace }}.Extensions
             {{- else if isMap . }}
             writer.WriteMap(o.{{ .Name }},
             {{- if isString .DictKey }}writer.WriteStringSbmf{{- else }}writer.Write{{- end }},
-            {{- if isString .Type }}writer.WriteStringSbmf{{- else }}writer.Write{{- end }});
+            {{- if isString .Type }}writer.WriteStringSbmf{{- else if isList .Dim }}writer.WriteList{{- else }}writer.Write{{- end }});
             {{- else if isString .Type }}
             writer.WriteStringSbmf(o.{{ .Name }});
             {{- else if isList .Dim }}
@@ -65,7 +65,7 @@ namespace {{ .Namespace }}.Extensions
             {{- if isStringList .Type .Dim }}
             o.{{ .Name }} = reader.ReadList<{{ findPrimitiveType .Type }}{{range loopless .Dim }}[]{{end}}>();
             {{- else if isMap . }}
-            o.{{ .Name }} = ReadMap(reader, reader.{{ readFunc .DictKey }}, reader.{{ readFunc .Type }});
+            o.{{ .Name }} = ReadMap(reader, reader.{{ readFunc .DictKey }},{{- if isList .Dim }}reader.ReadList<{{findPrimitiveType .Type}}>{{- else}}reader.{{ readFunc .Type }}{{- end}});
             {{- else if isString .Type }}
             o.{{ .Name }} = reader.ReadStringSbmf();
             {{- else if isList .Dim }}

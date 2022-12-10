@@ -82,6 +82,7 @@ namespace cs
                 S = new Dictionary<string, string> { { "hello", "world" }, { "you", "are" } },
                 B = new Dictionary<bool, bool> { { true, false }, { false, true } },
                 SI32 = new Dictionary<string, int> { { "hello", 1 }, { "world", 2 } },
+                SII32 = new Dictionary<string, int[]> { { "twenties", new[] { 20, 21, 22 } }, { "thirties", new[] { 30, 31, 32 } } },
             };
 
             var p2 = new PrimitiveMaps();
@@ -308,6 +309,7 @@ namespace cs
             Assert.AreEqual(new Dictionary<string, string> { { "hello", "world" }, { "you", "are" } }, p.S);
             Assert.AreEqual(new Dictionary<bool, bool> { { true, false }, { false, true } }, p.B);
             Assert.AreEqual(new Dictionary<string, int> { { "one", 1 }, { "two", 2 }, { "three", 3 } }, p.SI32);
+            Assert.AreEqual(new Dictionary<string, int[]> { { "twenties", new[] { 20, 21, 22 } }, { "thirties", new[] { 30, 31, 32 } } }, p.SII32);
         }
 
         [Test]
