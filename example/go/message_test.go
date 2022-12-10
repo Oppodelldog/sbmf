@@ -147,13 +147,13 @@ func TestAliasLists(t *testing.T) {
 
 func TestPrimitiveMaps(t *testing.T) {
 	foo := PrimitiveMaps{
-		I32:  map[int32]int32{math.MinInt32: 0, 0: math.MaxInt32},
-		I64:  map[int64]int64{math.MinInt64: 0, 0: math.MaxInt64},
-		F32:  map[float32]float32{float32Min: 0, 0: math.MaxFloat32},
-		F64:  map[float64]float64{float64Min: 0, 0: math.MaxFloat64},
-		S:    map[string]string{"hello": "world"},
+		I32:  map[int32]int32{math.MinInt32: 1, 2: math.MaxInt32},
+		I64:  map[int64]int64{math.MinInt64: 3, 4: math.MaxInt64},
+		F32:  map[float32]float32{float32Min: 5.5, 6.6: math.MaxFloat32},
+		F64:  map[float64]float64{float64Min: 7.7, 8.8: math.MaxFloat64},
+		S:    map[string]string{"hello": "world", "you": "are"},
+		B:    map[bool]bool{true: false, false: true},
 		SI32: map[string]int32{"one": 1, "two": 2, "three": 3},
-		B:    map[bool]bool{true: false},
 	}
 
 	d, err := foo.MarshalBinary()
@@ -318,7 +318,7 @@ func TestCrossLanguageAlias(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assertEquals(t, a.MI32, MyInteger32(1))
+	assertEquals(t, a.MI32, MyInteger32Value1)
 	assertEquals(t, a.MI64, MyInteger64(2))
 	assertEquals(t, a.MF32, MyFloat32(3.3))
 	//TODO: check why this fails, go -> c# works
@@ -372,7 +372,7 @@ func TestCrossLanguageAliasList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assertSlicesEqual(t, al.MI32, []MyInteger32{1, 2, 3})
+	assertSlicesEqual(t, al.MI32, []MyInteger32{MyInteger32Value1, MyInteger32Value2, 3})
 	assertSlicesEqual(t, al.MI64, []MyInteger64{4, 5, 6})
 	assertSlicesEqual(t, al.MF32, []MyFloat32{float32Min, 0, 0.6, 0.7, 0.8, 0.9, 1.0, math.MaxFloat32})
 	//assertSlicesEqual(t, al.MF64, []MyFloat64{10.10, 11.11, 12.12})

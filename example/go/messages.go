@@ -3,12 +3,12 @@
 package data
 
 import (
-    "bytes"
-    "encoding/binary"
-    "errors"
-    "fmt"
-    "io"
-    "reflect"
+"bytes"
+"encoding/binary"
+"errors"
+"fmt"
+"io"
+"reflect"
 )
 
 var ErrUnknownMessage = errors.New("unknown message")
@@ -25,10 +25,10 @@ const (
 )
 const (
     // Enums
-    MyInteger32Value1 MyInteger32 = 1
-    MyInteger32Value2 MyInteger32 = 2
-    TestEnumValue1 TestEnum = 1
-    TestEnumValue2 TestEnum = 2
+        MyInteger32Value1 MyInteger32 = 1
+        MyInteger32Value2 MyInteger32 = 2
+        TestEnumValue1 TestEnum = 1
+        TestEnumValue2 TestEnum = 2
 )
 
 type (
@@ -41,7 +41,7 @@ type (
     MyInteger64 int64
 
     // Enums
-    TestEnum int32
+        TestEnum int32
 
     // Messages
     Alias struct {
@@ -184,20 +184,6 @@ func unmarshal(v interface{}, r io.Reader) error {
     return nil
 
     // ListTypes
-    case *[]MyInteger32:
-        return unmarshalSlice(r,v)
-    case *[]MyInteger64:
-        return unmarshalSlice(r,v)
-    case *[]MyFloat32:
-        return unmarshalSlice(r,v)
-    case *[]MyFloat64:
-        return unmarshalSlice(r,v)
-    case *[]MyString:
-        return unmarshalSlice(r,v)
-    case *[]TestEnum:
-        return unmarshalSlice(r,v)
-    case *[]MyBoolean:
-        return unmarshalSlice(r,v)
     case *[]int32:
         return unmarshalSlice(r,v)
     case *[]int64:
@@ -215,6 +201,20 @@ func unmarshal(v interface{}, r io.Reader) error {
     case *[][]string:
         return unmarshalSlice(r,v)
     case *[]bool:
+        return unmarshalSlice(r,v)
+    case *[]MyInteger32:
+        return unmarshalSlice(r,v)
+    case *[]MyInteger64:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat32:
+        return unmarshalSlice(r,v)
+    case *[]MyFloat64:
+        return unmarshalSlice(r,v)
+    case *[]MyString:
+        return unmarshalSlice(r,v)
+    case *[]TestEnum:
+        return unmarshalSlice(r,v)
+    case *[]MyBoolean:
         return unmarshalSlice(r,v)
 
     // MapTypes

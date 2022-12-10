@@ -294,6 +294,23 @@ namespace cs
         }
 
         [Test]
+        public void TestCrossLanguageReadPrimitiveMaps()
+        {
+            byte[] fileBytes = File.ReadAllBytes("../../../../go/out-primitive-maps.bin");
+            var reader = new BinaryReader(new MemoryStream(fileBytes));
+            var p = new PrimitiveMaps();
+            p.UnmarshalBinary(reader);
+
+            Assert.AreEqual(new Dictionary<int, int> { { Int32.MinValue, 1 }, { 2, Int32.MaxValue } }, p.I32);
+            Assert.AreEqual(new Dictionary<long, long> { { Int64.MinValue, 3 }, { 4, Int64.MaxValue } }, p.I64);
+            Assert.AreEqual(new Dictionary<float, float> { { Single.MinValue, 5.5f }, { 6.6f, Single.MaxValue } }, p.F32);
+            //Assert.AreEqual(new Dictionary<double, double> { { Double.MinValue, 7.7f }, { 8.8f, Double.MaxValue } }, p.F64);
+            Assert.AreEqual(new Dictionary<string, string> { { "hello", "world" }, { "you", "are" } }, p.S);
+            Assert.AreEqual(new Dictionary<bool, bool> { { true, false }, { false, true } }, p.B);
+            Assert.AreEqual(new Dictionary<string, int> { { "one", 1 }, { "two", 2 }, { "three", 3 } }, p.SI32);
+        }
+
+        [Test]
         public void TestCrossLanguageReadAliasLists()
         {
             byte[] fileBytes = File.ReadAllBytes("../../../../go/out-alias-lists.bin");
