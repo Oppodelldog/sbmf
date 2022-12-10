@@ -194,12 +194,7 @@ func marshalSlice[T any](w io.Writer, v []T) error {
     for i := int32(0); i < length; i++ {
         switch vt := any(v[i]).(type) {
         case string:
-            e := marshal(int32(len(vt)),w)
-            if e != nil {
-                return fmt.Errorf("err marshal string length: %w", e)
-            }
-            _,e = w.Write([]byte(vt))
-            if e != nil {
+            if e:= marshalString(w, vt); e != nil {
                 return fmt.Errorf("err marshal string: %w", e)
             }
         default:
