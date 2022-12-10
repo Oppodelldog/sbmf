@@ -15,13 +15,13 @@ var ErrUnknownMessage = errors.New("unknown message")
 
 const (
     // Messages
-    AliasID = int8(1)
-    AliasListsID = int8(2)
-    FoobarID = int8(3)
-    OneFieldID = int8(4)
-    PrimitiveID = int8(5)
-    PrimitiveListsID = int8(6)
-    PrimitiveMapsID = int8(7)
+    MessageIDAlias = int8(1)
+    MessageIDAliasLists = int8(2)
+    MessageIDFoobar = int8(3)
+    MessageIDOneField = int8(4)
+    MessageIDPrimitive = int8(5)
+    MessageIDPrimitiveLists = int8(6)
+    MessageIDPrimitiveMaps = int8(7)
 )
 const (
     // Enums
@@ -796,19 +796,19 @@ func WriteMessage(w io.Writer, m interface{}) error {
 var messageID int8
     switch m.(type) {
         case Alias:
-        messageID = AliasID
+        messageID = MessageIDAlias
         case AliasLists:
-        messageID = AliasListsID
+        messageID = MessageIDAliasLists
         case Foobar:
-        messageID = FoobarID
+        messageID = MessageIDFoobar
         case OneField:
-        messageID = OneFieldID
+        messageID = MessageIDOneField
         case Primitive:
-        messageID = PrimitiveID
+        messageID = MessageIDPrimitive
         case PrimitiveLists:
-        messageID = PrimitiveListsID
+        messageID = MessageIDPrimitiveLists
         case PrimitiveMaps:
-        messageID = PrimitiveMapsID
+        messageID = MessageIDPrimitiveMaps
     }
 
     if messageID == 0 {
@@ -829,43 +829,43 @@ func ReadMessage(r io.Reader) (interface{}, error) {
     }
 
     switch id {
-        case AliasID:
+        case MessageIDAlias:
         var m Alias
         if e := unmarshal(&m, r); e != nil {
             return nil, fmt.Errorf("err unmarshal Alias: %w", e)
         }
         return m, nil
-        case AliasListsID:
+        case MessageIDAliasLists:
         var m AliasLists
         if e := unmarshal(&m, r); e != nil {
             return nil, fmt.Errorf("err unmarshal AliasLists: %w", e)
         }
         return m, nil
-        case FoobarID:
+        case MessageIDFoobar:
         var m Foobar
         if e := unmarshal(&m, r); e != nil {
             return nil, fmt.Errorf("err unmarshal Foobar: %w", e)
         }
         return m, nil
-        case OneFieldID:
+        case MessageIDOneField:
         var m OneField
         if e := unmarshal(&m, r); e != nil {
             return nil, fmt.Errorf("err unmarshal OneField: %w", e)
         }
         return m, nil
-        case PrimitiveID:
+        case MessageIDPrimitive:
         var m Primitive
         if e := unmarshal(&m, r); e != nil {
             return nil, fmt.Errorf("err unmarshal Primitive: %w", e)
         }
         return m, nil
-        case PrimitiveListsID:
+        case MessageIDPrimitiveLists:
         var m PrimitiveLists
         if e := unmarshal(&m, r); e != nil {
             return nil, fmt.Errorf("err unmarshal PrimitiveLists: %w", e)
         }
         return m, nil
-        case PrimitiveMapsID:
+        case MessageIDPrimitiveMaps:
         var m PrimitiveMaps
         if e := unmarshal(&m, r); e != nil {
             return nil, fmt.Errorf("err unmarshal PrimitiveMaps: %w", e)

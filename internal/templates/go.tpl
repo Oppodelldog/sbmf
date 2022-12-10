@@ -16,7 +16,7 @@ var ErrUnknownMessage = errors.New("unknown message")
 const (
     // Messages
 {{- range $name, $id := .MessageIDs }}
-    {{ $name }}ID = int8({{ $id }})
+    {{ messageIdName $name }} = int8({{ $id }})
 {{- end }}
 )
 const (
@@ -255,7 +255,7 @@ var messageID int8
     switch m.(type) {
     {{- range $name, $fields := .Messages }}
         case {{ $name }}:
-        messageID = {{ $name }}ID
+        messageID = {{ messageIdName $name }}
     {{- end }}
     }
 
@@ -278,7 +278,7 @@ func ReadMessage(r io.Reader) (interface{}, error) {
 
     switch id {
     {{- range $name, $fields := .Messages }}
-        case {{ $name }}ID:
+        case {{ messageIdName $name }}:
         var m {{ $name }}
         if e := unmarshal(&m, r); e != nil {
             return nil, fmt.Errorf("err unmarshal {{ $name }}: %w", e)

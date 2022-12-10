@@ -119,6 +119,9 @@ func (g *Generator) CreateMessageIDs() {
 	}
 }
 
+func (g *Generator) messageIdName(name MessageName) string {
+	return fmt.Sprintf("MessageID%s", name)
+}
 func (g *Generator) hasType(s string) bool {
 	for _, t := range g.CustomTypes {
 		if t.Name == s {

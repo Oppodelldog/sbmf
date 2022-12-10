@@ -65,8 +65,9 @@ func goTemplate(g *Generator) (*template.Template, error) {
 
 				return t
 			},
-			"listTypes": g.listTypes,
-			"mapTypes":  g.mapTypes,
+			"listTypes":     g.listTypes,
+			"mapTypes":      g.mapTypes,
+			"messageIdName": g.messageIdName,
 		})
 
 	t, err := t.Parse(templates.Go)

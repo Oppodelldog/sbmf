@@ -492,7 +492,8 @@ namespace Messages.Extensions
         writer.Write(ms.ToArray());
     }
 }
-    
+
+
 public class PacketReader
 {
     private readonly MemoryStream _buffer = new MemoryStream();
