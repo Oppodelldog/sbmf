@@ -15,9 +15,11 @@ lint: ## Run the linters
 fmt: ## gofmt and goimports all go files
 	find . -name '*.go' -not -wholename './vendor/*' | while read -r file; do gofmt -w -s "$$file"; goimports -w "$$file"; done
 
+build: clean ## Build the binary
+	$(GOBUILD) -o $(GOPATH)/bin/$(BINARY_NAME) -v
 
 clean: ## cleans the build folder
-	rm -f $(BUILD_ARTIFACTS)/$(BINARY_NAME)
+	rm -f $(GOPATH)/bin/$(BINARY_NAME)
 	 
 # Self-Documented Makefile see https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help:
