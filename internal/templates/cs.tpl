@@ -180,7 +180,7 @@ namespace {{ .Namespace }}.Extensions
             }
             else
             {
-                throw new Exception("Unknown type");
+                throw new Exception("Unknown message type " + message.GetType());
             }
         }
     }
@@ -231,7 +231,7 @@ namespace {{ .Namespace }}.Extensions
             }
             else
             {
-                throw new Exception("Unknown type");
+                throw new Exception("Unknown message type " + message.GetType());
             }
         }
 
