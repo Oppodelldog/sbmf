@@ -174,6 +174,12 @@ namespace {{ .Namespace }}.Extensions
                 writer.Write((int)item);
             }
         {{- end }}
+        {{- range $name, $message := .Messages }}
+            else if(item is {{ $name }})
+            {
+                writer.Write((({{ $name }})item).MarshalBinary());
+            }
+        {{- end }}
             else if(item.GetType().IsArray)
          {
                 writer.WriteList((IEnumerable)item);
@@ -221,6 +227,12 @@ namespace {{ .Namespace }}.Extensions
             else if (typeof(T) == typeof({{ $name }}))
             {
                 result[i] = (T)(object)reader.ReadInt32();
+            }
+        {{- end }}
+        {{- range $name, $message := .Messages }}
+            else if (typeof(T) == typeof({{ $name }}))
+            {
+                result[i] = (T)(object)reader.Read{{ $name }}();
             }
         {{- end }}
             else if (typeof(T).IsArray)

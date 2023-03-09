@@ -227,6 +227,29 @@ func TestFooBar(t *testing.T) {
 	assertSlicesEqual(t, foo.PL.B, foo.PL.B)
 }
 
+func TestOneFieldList(t *testing.T) {
+	foo := OneFieldList{
+		Fields: []OneField{
+			{S: "hello"},
+			{S: "world"},
+		},
+	}
+
+	d, err := foo.MarshalBinary()
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, "one-field-list.bin", d)
+
+	var foo2 OneFieldList
+	err = foo2.UnmarshalBinary(bytes.NewBuffer(d))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertSlicesEqual(t, foo2.Fields, foo.Fields)
+}
+
 func writeFile(t *testing.T, name string, data []byte) {
 	t.Helper()
 	err := os.WriteFile(fmt.Sprintf("out-%s", name), data, 0644)
@@ -384,6 +407,17 @@ func TestCrossLanguageAliasList(t *testing.T) {
 	assertSlicesEqual(t, al.MS, []MyString{"hello", "world"})
 	assertSlicesEqual(t, al.E, []TestEnum{TestEnumValue1, TestEnumValue2})
 	assertSlicesEqual(t, al.B, []MyBoolean{true, false, true})
+}
+
+func TestCrossLanguageOneFieldList(t *testing.T) {
+	data := readCsFile(t, "one-field-list.bin")
+	var ofl OneFieldList
+	err := ofl.UnmarshalBinary(bytes.NewBuffer(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertSlicesEqual(t, ofl.Fields, []OneField{{S: "hello"}, {S: "world"}})
 }
 
 func TestWriteMessage(t *testing.T) {

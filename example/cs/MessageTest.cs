@@ -246,6 +246,29 @@ namespace cs
         }
 
         [Test]
+        public void TestOneFieldList()
+        {
+            var p = new OneFieldList()
+            {
+                Fields = new []
+                {
+                    new OneField{ S = "hello" },
+                    new OneField{ S = "world" },
+                }
+            };
+
+            var p2 = new OneFieldList();
+            var data = p.MarshalBinary();
+
+            WriteFile("one-field-list.bin", data);
+
+            var reader = new BinaryReader(new MemoryStream(data));
+            p2.UnmarshalBinary(reader);
+
+            Assert.AreEqual(p.Fields, p2.Fields);
+        }
+
+        [Test]
         public void TestCrossLanguageReadPrimitive()
         {
             byte[] fileBytes = File.ReadAllBytes("../../../../go/out-primitive.bin");
@@ -369,6 +392,17 @@ namespace cs
             Assert.AreEqual(new[] { "hello", "world" }, p.AL.MS);
             Assert.AreEqual(new[] { TestEnum.Value1, TestEnum.Value2 }, p.AL.E);
             Assert.AreEqual(new[] { true, false }, p.AL.B);
+        }
+
+        [Test]
+        public void TestCrossLanguageOneFieldList()
+        {
+            byte[] fileBytes = File.ReadAllBytes("../../../../go/out-one-field-list.bin");
+            var reader = new BinaryReader(new MemoryStream(fileBytes));
+            var p = new OneFieldList();
+            p.UnmarshalBinary(reader);
+
+            Assert.AreEqual(new[] { new OneField { S = "hello" }, new OneField { S = "world" } }, p.Fields);
         }
 
         [Test]

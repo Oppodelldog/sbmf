@@ -46,6 +46,9 @@ namespace Messages
     public struct OneField {
         public string S;
     }
+    public struct OneFieldList {
+        public OneField[] Fields;
+    }
     public struct Primitive {
         public int I32;
         public long I64;
@@ -167,6 +170,20 @@ namespace Messages.Extensions
         public static void UnmarshalBinary(ref this OneField o,BinaryReader reader)
         {
             o.S = reader.ReadStringSbmf();
+        }
+        public static byte[] MarshalBinary(this OneFieldList o)
+        {
+            MemoryStream ms = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(ms);
+            writer.WriteList(o.Fields);
+            writer.Flush();
+
+            return ms.ToArray();
+        }
+
+        public static void UnmarshalBinary(ref this OneFieldList o,BinaryReader reader)
+        {
+            o.Fields = reader.ReadList<OneField>();
         }
         public static byte[] MarshalBinary(this Primitive o)
         {
@@ -299,6 +316,17 @@ namespace Messages.Extensions
         o.UnmarshalBinary(reader);
         return o;
     }
+    public static void Write(this BinaryWriter writer, OneFieldList o)
+    {
+        writer.Write(o.MarshalBinary());
+    }
+
+    public static OneFieldList ReadOneFieldList(this BinaryReader reader)
+    {
+        OneFieldList o = new OneFieldList();
+        o.UnmarshalBinary(reader);
+        return o;
+    }
     public static void Write(this BinaryWriter writer, Primitive o)
     {
         writer.Write(o.MarshalBinary());
@@ -401,13 +429,45 @@ namespace Messages.Extensions
             {
                 writer.Write((int)item);
             }
+            else if(item is Alias)
+            {
+                writer.Write(((Alias)item).MarshalBinary());
+            }
+            else if(item is AliasLists)
+            {
+                writer.Write(((AliasLists)item).MarshalBinary());
+            }
+            else if(item is Foobar)
+            {
+                writer.Write(((Foobar)item).MarshalBinary());
+            }
+            else if(item is OneField)
+            {
+                writer.Write(((OneField)item).MarshalBinary());
+            }
+            else if(item is OneFieldList)
+            {
+                writer.Write(((OneFieldList)item).MarshalBinary());
+            }
+            else if(item is Primitive)
+            {
+                writer.Write(((Primitive)item).MarshalBinary());
+            }
+            else if(item is PrimitiveLists)
+            {
+                writer.Write(((PrimitiveLists)item).MarshalBinary());
+            }
+            else if(item is PrimitiveMaps)
+            {
+                writer.Write(((PrimitiveMaps)item).MarshalBinary());
+            }
             else if(item.GetType().IsArray)
          {
                 writer.WriteList((IEnumerable)item);
             }
             else
             {
-                throw new Exception("Unknown type");
+                throw new Exception("Unknown message type " + item.GetType());
             }
         }
     }
@@ -452,6 +512,38 @@ namespace Messages.Extensions
             {
                 result[i] = (T)(object)reader.ReadInt32();
             }
+            else if (typeof(T) == typeof(Alias))
+            {
+                result[i] = (T)(object)reader.ReadAlias();
+            }
+            else if (typeof(T) == typeof(AliasLists))
+            {
+                result[i] = (T)(object)reader.ReadAliasLists();
+            }
+            else if (typeof(T) == typeof(Foobar))
+            {
+                result[i] = (T)(object)reader.ReadFoobar();
+            }
+            else if (typeof(T) == typeof(OneField))
+            {
+                result[i] = (T)(object)reader.ReadOneField();
+            }
+            else if (typeof(T) == typeof(OneFieldList))
+            {
+                result[i] = (T)(object)reader.ReadOneFieldList();
+            }
+            else if (typeof(T) == typeof(Primitive))
+            {
+                result[i] = (T)(object)reader.ReadPrimitive();
+            }
+            else if (typeof(T) == typeof(PrimitiveLists))
+            {
+                result[i] = (T)(object)reader.ReadPrimitiveLists();
+            }
+            else if (typeof(T) == typeof(PrimitiveMaps))
+            {
+                result[i] = (T)(object)reader.ReadPrimitiveMaps();
+            }
             else if (typeof(T).IsArray)
             {
                 var method = typeof(BinaryExtensions).GetMethod(nameof(ReadList));
@@ -460,7 +552,7 @@ namespace Messages.Extensions
             }
             else
             {
-                throw new Exception("Unknown type");
+                throw new Exception("Unknown message type " + typeof(T));
             }
         }
 
@@ -490,12 +582,14 @@ namespace Messages.Extensions
                 return 3;
             case Type t when t == typeof(OneField):
                 return 4;
-            case Type t when t == typeof(Primitive):
+            case Type t when t == typeof(OneFieldList):
                 return 5;
-            case Type t when t == typeof(PrimitiveLists):
+            case Type t when t == typeof(Primitive):
                 return 6;
-            case Type t when t == typeof(PrimitiveMaps):
+            case Type t when t == typeof(PrimitiveLists):
                 return 7;
+            case Type t when t == typeof(PrimitiveMaps):
+                return 8;
             default:
                 throw new Exception("Unknown message type " + message.GetType());
         }
@@ -517,6 +611,9 @@ namespace Messages.Extensions
             break;
         case Type t when t == typeof(OneField):
             writer.Write(((OneField)message).MarshalBinary());
+            break;
+        case Type t when t == typeof(OneFieldList):
+            writer.Write(((OneFieldList)message).MarshalBinary());
             break;
         case Type t when t == typeof(Primitive):
             writer.Write(((Primitive)message).MarshalBinary());
@@ -553,14 +650,18 @@ namespace Messages.Extensions
             msgOneField.UnmarshalBinary(reader);
             return msgOneField;
             case 5:
+            var msgOneFieldList = new OneFieldList();
+            msgOneFieldList.UnmarshalBinary(reader);
+            return msgOneFieldList;
+            case 6:
             var msgPrimitive = new Primitive();
             msgPrimitive.UnmarshalBinary(reader);
             return msgPrimitive;
-            case 6:
+            case 7:
             var msgPrimitiveLists = new PrimitiveLists();
             msgPrimitiveLists.UnmarshalBinary(reader);
             return msgPrimitiveLists;
-            case 7:
+            case 8:
             var msgPrimitiveMaps = new PrimitiveMaps();
             msgPrimitiveMaps.UnmarshalBinary(reader);
             return msgPrimitiveMaps;

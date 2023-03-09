@@ -19,9 +19,10 @@ const (
     MessageIDAliasLists = int8(2)
     MessageIDFoobar = int8(3)
     MessageIDOneField = int8(4)
-    MessageIDPrimitive = int8(5)
-    MessageIDPrimitiveLists = int8(6)
-    MessageIDPrimitiveMaps = int8(7)
+    MessageIDOneFieldList = int8(5)
+    MessageIDPrimitive = int8(6)
+    MessageIDPrimitiveLists = int8(7)
+    MessageIDPrimitiveMaps = int8(8)
 )
 const (
     // Enums
@@ -33,12 +34,12 @@ const (
 
 type (
     // CustomTypes
-    MyFloat64 float64
-    MyInteger32 int32
-    MyInteger64 int64
     MyString string
     MyBoolean bool
     MyFloat32 float32
+    MyFloat64 float64
+    MyInteger32 int32
+    MyInteger64 int64
 
     // Enums
         TestEnum int32
@@ -70,6 +71,9 @@ type (
     }
     OneField struct {
         S string
+    }
+    OneFieldList struct {
+        Fields []OneField
     }
     Primitive struct {
         I32 int32
@@ -117,6 +121,8 @@ func unmarshal(v interface{}, r io.Reader) error {
     return v.UnmarshalBinary(r)
     case *OneField:
     return v.UnmarshalBinary(r)
+    case *OneFieldList:
+    return v.UnmarshalBinary(r)
     case *Primitive:
     return v.UnmarshalBinary(r)
     case *PrimitiveLists:
@@ -136,30 +142,6 @@ func unmarshal(v interface{}, r io.Reader) error {
     return nil
 
     // CustomTypes
-    case *MyFloat64:
-    var t float64
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return fmt.Errorf("err unmarshal MyFloat64: %w", e)
-    }
-    *v = MyFloat64(t)
-    return nil
-    case *MyInteger32:
-    var t int32
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return fmt.Errorf("err unmarshal MyInteger32: %w", e)
-    }
-    *v = MyInteger32(t)
-    return nil
-    case *MyInteger64:
-    var t int64
-    var e=unmarshal(&t,r)
-    if e != nil {
-    return fmt.Errorf("err unmarshal MyInteger64: %w", e)
-    }
-    *v = MyInteger64(t)
-    return nil
     case *MyString:
     var t string
     var e=unmarshal(&t,r)
@@ -184,59 +166,85 @@ func unmarshal(v interface{}, r io.Reader) error {
     }
     *v = MyFloat32(t)
     return nil
+    case *MyFloat64:
+    var t float64
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return fmt.Errorf("err unmarshal MyFloat64: %w", e)
+    }
+    *v = MyFloat64(t)
+    return nil
+    case *MyInteger32:
+    var t int32
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return fmt.Errorf("err unmarshal MyInteger32: %w", e)
+    }
+    *v = MyInteger32(t)
+    return nil
+    case *MyInteger64:
+    var t int64
+    var e=unmarshal(&t,r)
+    if e != nil {
+    return fmt.Errorf("err unmarshal MyInteger64: %w", e)
+    }
+    *v = MyInteger64(t)
+    return nil
 
     // ListTypes
-    case *[][]int64:
-        return unmarshalSlice(r,v)
-    case *[][]string:
-        return unmarshalSlice(r,v)
-    case *[]bool:
-        return unmarshalSlice(r,v)
-    case *[]MyInteger64:
-        return unmarshalSlice(r,v)
     case *[]MyFloat32:
-        return unmarshalSlice(r,v)
-    case *[]int32:
-        return unmarshalSlice(r,v)
-    case *[]MyInteger32:
         return unmarshalSlice(r,v)
     case *[]TestEnum:
         return unmarshalSlice(r,v)
     case *[]MyBoolean:
         return unmarshalSlice(r,v)
-    case *[]float32:
+    case *[]int64:
+        return unmarshalSlice(r,v)
+    case *[]MyInteger64:
+        return unmarshalSlice(r,v)
+    case *[][]int64:
         return unmarshalSlice(r,v)
     case *[]string:
         return unmarshalSlice(r,v)
+    case *[]MyInteger32:
+        return unmarshalSlice(r,v)
     case *[]MyFloat64:
+        return unmarshalSlice(r,v)
+    case *[]int32:
+        return unmarshalSlice(r,v)
+    case *[]float32:
+        return unmarshalSlice(r,v)
+    case *[][]string:
         return unmarshalSlice(r,v)
     case *[]MyString:
         return unmarshalSlice(r,v)
-    case *[][]int32:
-        return unmarshalSlice(r,v)
     case *[]float64:
         return unmarshalSlice(r,v)
-    case *[]int64:
+    case *[][]int32:
+        return unmarshalSlice(r,v)
+    case *[]bool:
+        return unmarshalSlice(r,v)
+    case *[]OneField:
         return unmarshalSlice(r,v)
 
     // MapTypes
     case *map[int64]int64:
     return unmarshalMap(r,v)
-    case *map[bool]bool:
-    return unmarshalMap(r,v)
-    case *map[MyString][]int32:
-    return unmarshalMap(r,v)
-    case *map[string]OneField:
-    return unmarshalMap(r,v)
-    case *map[int32]int32:
-    return unmarshalMap(r,v)
-    case *map[float64]float64:
+    case *map[float32]float32:
     return unmarshalMap(r,v)
     case *map[string]string:
     return unmarshalMap(r,v)
     case *map[string]int32:
     return unmarshalMap(r,v)
-    case *map[float32]float32:
+    case *map[MyString][]int32:
+    return unmarshalMap(r,v)
+    case *map[int32]int32:
+    return unmarshalMap(r,v)
+    case *map[float64]float64:
+    return unmarshalMap(r,v)
+    case *map[bool]bool:
+    return unmarshalMap(r,v)
+    case *map[string]OneField:
     return unmarshalMap(r,v)
 
     default:
@@ -290,6 +298,16 @@ func marshal(v interface{}, w io.Writer) error {
         return fmt.Errorf("err write OneField: %w", e)
     }
     return nil
+    case OneFieldList:
+    d, e := v.MarshalBinary()
+    if e != nil {
+        return fmt.Errorf("err marshal OneFieldList: %w", e)
+    }
+    _, e = w.Write(d)
+    if e != nil {
+        return fmt.Errorf("err write OneFieldList: %w", e)
+    }
+    return nil
     case Primitive:
     d, e := v.MarshalBinary()
     if e != nil {
@@ -326,71 +344,73 @@ func marshal(v interface{}, w io.Writer) error {
     return binary.Write(w, binary.LittleEndian, int32(v))
 
     // CustomTypes
-    case MyFloat64:
-    return marshal(float64(v),w)
-    case MyInteger32:
-    return marshal(int32(v),w)
-    case MyInteger64:
-    return marshal(int64(v),w)
     case MyString:
     return marshal(string(v),w)
     case MyBoolean:
     return marshal(bool(v),w)
     case MyFloat32:
     return marshal(float32(v),w)
+    case MyFloat64:
+    return marshal(float64(v),w)
+    case MyInteger32:
+    return marshal(int32(v),w)
+    case MyInteger64:
+    return marshal(int64(v),w)
 
     // ListTypes
-    case []MyInteger32:
-    return marshalSlice(w,v)
-    case []int64:
-    return marshalSlice(w,v)
-    case []float64:
-    return marshalSlice(w,v)
-    case [][]string:
-    return marshalSlice(w,v)
     case []MyFloat32:
     return marshalSlice(w,v)
-    case []float32:
-    return marshalSlice(w,v)
-    case [][]int64:
+    case []MyString:
     return marshalSlice(w,v)
     case []string:
     return marshalSlice(w,v)
-    case []MyInteger64:
+    case [][]string:
     return marshalSlice(w,v)
-    case []MyFloat64:
-    return marshalSlice(w,v)
-    case []MyString:
+    case []MyInteger32:
     return marshalSlice(w,v)
     case []TestEnum:
     return marshalSlice(w,v)
     case []MyBoolean:
     return marshalSlice(w,v)
-    case []int32:
+    case []OneField:
+    return marshalSlice(w,v)
+    case []float64:
+    return marshalSlice(w,v)
+    case [][]int64:
+    return marshalSlice(w,v)
+    case []MyFloat64:
+    return marshalSlice(w,v)
+    case []int64:
     return marshalSlice(w,v)
     case [][]int32:
+    return marshalSlice(w,v)
+    case []MyInteger64:
+    return marshalSlice(w,v)
+    case []int32:
+    return marshalSlice(w,v)
+    case []float32:
     return marshalSlice(w,v)
     case []bool:
     return marshalSlice(w,v)
 
     // MapTypes
+    case map[string]OneField:
+    return marshalMap(w,v)
+    case map[int32]int32:
+    return marshalMap(w,v)
     case map[float64]float64:
     return marshalMap(w,v)
     case map[string]string:
     return marshalMap(w,v)
     case map[bool]bool:
     return marshalMap(w,v)
-    case map[int32]int32:
-    return marshalMap(w,v)
-    case map[int64]int64:
-    return marshalMap(w,v)
-    case map[float32]float32:
-    return marshalMap(w,v)
     case map[string]int32:
     return marshalMap(w,v)
     case map[MyString][]int32:
     return marshalMap(w,v)
-    case map[string]OneField:
+    case map[int64]int64:
+    return marshalMap(w,v)
+    case map[float32]float32:
     return marshalMap(w,v)
 
     default:
@@ -561,6 +581,25 @@ func marshal(v interface{}, w io.Writer) error {
     var e error
     if e=marshal(m.S,w); e != nil {
         return nil, fmt.Errorf("err marshal m.S: %w", e)
+    }
+
+    return w.Bytes(),nil
+    }
+    func (m *OneFieldList) UnmarshalBinary(r io.Reader) error{
+    var e error
+    if e=unmarshal(&m.Fields, r); e != nil {
+        return fmt.Errorf("err unmarshal m.Fields: %w", e)
+    }
+
+    return nil
+    }
+
+    func (m *OneFieldList) MarshalBinary() ([]byte, error) {
+    var data []byte
+    w := bytes.NewBuffer(data)
+    var e error
+    if e=marshal(m.Fields,w); e != nil {
+        return nil, fmt.Errorf("err marshal m.Fields: %w", e)
     }
 
     return w.Bytes(),nil
@@ -825,6 +864,8 @@ var messageID int8
         messageID = MessageIDFoobar
         case OneField:
         messageID = MessageIDOneField
+        case OneFieldList:
+        messageID = MessageIDOneFieldList
         case Primitive:
         messageID = MessageIDPrimitive
         case PrimitiveLists:
@@ -873,6 +914,12 @@ func ReadMessage(r io.Reader) (interface{}, error) {
         var m OneField
         if e := unmarshal(&m, r); e != nil {
             return nil, fmt.Errorf("err unmarshal OneField: %w", e)
+        }
+        return m, nil
+        case MessageIDOneFieldList:
+        var m OneFieldList
+        if e := unmarshal(&m, r); e != nil {
+            return nil, fmt.Errorf("err unmarshal OneFieldList: %w", e)
         }
         return m, nil
         case MessageIDPrimitive:
