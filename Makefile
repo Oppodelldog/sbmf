@@ -20,7 +20,10 @@ build: clean ## Build the binary
 
 clean: ## cleans the build folder
 	rm -f $(GOPATH)/bin/$(BINARY_NAME)
-	 
+
+test-messages:
+	go run main.go example/sample.yaml
+
 # Self-Documented Makefile see https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
