@@ -1,0 +1,6 @@
+attributes:
+  version: 1
+messages:
+  Coordinate:
+  - X: i32
+  - Y: i32
