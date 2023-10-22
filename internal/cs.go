@@ -103,6 +103,11 @@ func csharpTemplate(g *Generator) (*template.Template, error) {
 			t2 := internalTypeToCS(t1)
 			t3 := csTypeToBinaryReadFuncName(t2)
 
+			// support Message types for dictionary keys
+			if t3 == "" {
+				t3 = "Read" + t2
+			}
+
 			return t3
 		},
 		"isString": func(t string) bool {
