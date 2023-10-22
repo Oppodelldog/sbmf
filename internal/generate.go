@@ -102,9 +102,17 @@ func Generate(file string) {
 
 					var fields []TypeDef
 					for k3, v3 := range v2.(map[interface{}]interface{}) {
-						for _, v4 := range v3.([]interface{}) {
+						for i, v4 := range v3.([]interface{}) {
 							for k5, v5 := range v4.(map[interface{}]interface{}) {
-								fields = append(fields, newTypeDef(k5.(string), v5.(string)))
+								name, nameOK := k5.(string)
+								value, valueOK := v5.(string)
+								if !nameOK {
+									panic(fmt.Sprintf("invalid name '%v' in '%v' field no %v", k5, k3, i+1))
+								}
+								if !valueOK {
+									panic(fmt.Sprintf("invalid type '%v' in '%v' field no %v", v5, k3, i+1))
+								}
+								fields = append(fields, newTypeDef(name, value))
 							}
 						}
 						gen.addMessage(MessageName(k3.(string)), fields)
