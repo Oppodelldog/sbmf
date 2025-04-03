@@ -11,6 +11,13 @@ import (
 "reflect"
 )
 
+type numerics interface {
+    ~int8 | ~int16 | ~int32 | ~int64 |
+    ~uint8 | ~uint16 | ~uint32 | ~uint64 |
+    ~float32 | ~float64
+}
+
+
 var ErrUnknownMessage = errors.New("unknown message")
 
 const (
@@ -185,42 +192,121 @@ func marshal(v interface{}, w io.Writer) error {
     }
 {{- end }}
 
+func marshalPrimitiveSlice[T numerics](w io.Writer, v []T) error {
+    length := int32(len(v))
+    if err := binary.Write(w, binary.LittleEndian, length); err != nil {
+        return fmt.Errorf("err write slice length: %w", err)
+    }
+
+    if length == 0 {
+        return nil
+    }
+
+    if err := binary.Write(w, binary.LittleEndian, v); err != nil {
+        return fmt.Errorf("err write %T slice (len=%d): %w", v, length, err)
+    }
+
+    return nil
+}
+
 
 func marshalSlice[T any](w io.Writer, v []T) error {
-    var length = int32(len(v))
-    if e := binary.Write(w, binary.LittleEndian, length); e != nil {
-        return e
+    // Schnellpfad für primitive Typen
+    switch any(v).(type) {
+    case []float64:
+        return marshalPrimitiveSlice(w, any(v).([]float64))
+    case []float32:
+        return marshalPrimitiveSlice(w, any(v).([]float32))
+    case []int32:
+        return marshalPrimitiveSlice(w, any(v).([]int32))
+    case []int64:
+        return marshalPrimitiveSlice(w, any(v).([]int64))
+    case []uint8:
+        return marshalPrimitiveSlice(w, any(v).([]uint8))
+    case []int16:
+        return marshalPrimitiveSlice(w, any(v).([]int16))
+    // weitere Typen? Einfach hinzufügen
     }
-    for i := int32(0); i < length; i++ {
-        switch vt := any(v[i]).(type) {
+
+    // Standardweg für Nicht-Primitive
+    length := int32(len(v))
+    if err := binary.Write(w, binary.LittleEndian, length); err != nil {
+        return err
+    }
+
+    for i, elem := range v {
+        switch vt := any(elem).(type) {
         case string:
-            if e:= marshalString(w, vt); e != nil {
-                return fmt.Errorf("err marshal string: %w", e)
+            if err := marshalString(w, vt); err != nil {
+                return fmt.Errorf("err marshal string at index %d: %w", i, err)
             }
         default:
-            if e := marshal(vt, w); e != nil {
-                return fmt.Errorf("err marshal slice: %w", e)
+            if err := marshal(vt, w); err != nil {
+                return fmt.Errorf("err marshal slice element %d: %w", i, err)
             }
         }
+    }
+
+    return nil
+}
+
+func unmarshalPrimitiveSlice[T numerics](r io.Reader, v *[]T) error {
+    var length int32
+    if err := binary.Read(r, binary.LittleEndian, &length); err != nil {
+        return fmt.Errorf("err read slice length: %w", err)
+    }
+
+    if length < 0 {
+        return fmt.Errorf("invalid slice length: %d", length)
+    }
+
+    *v = make([]T, length)
+    if err := binary.Read(r, binary.LittleEndian, *v); err != nil {
+        return fmt.Errorf("err read %T slice (len=%d): %w", *v, length, err)
     }
 
     return nil
 }
 
 func unmarshalSlice[T any](r io.Reader, v *[]T) error {
-    var length int32
-    if e := binary.Read(r, binary.LittleEndian, &length); e != nil {
-        return fmt.Errorf("err unmarshal slice length: %w", e)
+    // Spezialfall: T ist numerics → direkt schnell verarbeiten
+    switch any(v).(type) {
+    case *[]float64:
+        return unmarshalPrimitiveSlice(r, any(v).(*[]float64))
+    case *[]float32:
+        return unmarshalPrimitiveSlice(r, any(v).(*[]float32))
+    case *[]int32:
+        return unmarshalPrimitiveSlice(r, any(v).(*[]int32))
+    case *[]int64:
+        return unmarshalPrimitiveSlice(r, any(v).(*[]int64))
+    case *[]uint8:
+        return unmarshalPrimitiveSlice(r, any(v).(*[]uint8))
+    case *[]int16:
+        return unmarshalPrimitiveSlice(r, any(v).(*[]int16))
+    // add more if needed
     }
-    *v = make([]T, length)
-    for i := 0; i < int(length); i++ {
-        if e := unmarshal(&(*v)[i], r); e != nil {
-            return fmt.Errorf("err unmarshal slice (len=%d): %w", length, e)
+
+    // Standardweg für Nicht-Primitive
+    var length int32
+    if err := binary.Read(r, binary.LittleEndian, &length); err != nil {
+        return fmt.Errorf("err unmarshal slice length: %w", err)
+    }
+
+    if length < 0 {
+        return fmt.Errorf("invalid slice length: %d", length)
+    }
+
+    slice := make([]T, length)
+    for i := range slice {
+        if err := unmarshal(&slice[i], r); err != nil {
+            return fmt.Errorf("err unmarshal slice element %d/%d: %w", i+1, length, err)
         }
     }
 
+    *v = slice
     return nil
 }
+
 
 func unmarshalString(r io.Reader, v *string) error {
     var l int32
