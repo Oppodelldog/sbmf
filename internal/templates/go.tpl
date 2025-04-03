@@ -17,6 +17,10 @@ type numerics interface {
     ~float32 | ~float64
 }
 
+type mapValues interface {
+    numerics | ~string
+}
+
 
 var ErrUnknownMessage = errors.New("unknown message")
 
@@ -446,52 +450,154 @@ func (pr *PacketReader) Read(r io.Reader) (interface{}, error) {
     return nil, nil
 }
 
-func marshalMap(w io.Writer, mapValue interface{}) error {
-    var mapValueReflect = reflect.ValueOf(mapValue)
-    var mapLength = mapValueReflect.Len()
-    if e := binary.Write(w, binary.LittleEndian, int32(mapLength)); e != nil {
-        return fmt.Errorf("err write map length: %w", e)
+func marshalPrimitiveMap[V mapValues](w io.Writer, m map[string]V) error {
+    length := int32(len(m))
+    if err := binary.Write(w, binary.LittleEndian, length); err != nil {
+        return fmt.Errorf("err write map length: %w", err)
     }
 
-    for _, key := range mapValueReflect.MapKeys() {
-        var value = mapValueReflect.MapIndex(key)
-        if e := marshal(key.Interface(), w); e != nil {
-            return fmt.Errorf("err marshal map key: %w", e)
+    for k, v := range m {
+        if err := marshalString(w, k); err != nil {
+            return fmt.Errorf("err write map key: %w", err)
         }
-        if e := marshal(value.Interface(), w); e != nil {
-            return fmt.Errorf("err marshal map value: %w", e)
+        if err := marshal(v, w); err != nil {
+            return fmt.Errorf("err write map value: %w", err)
         }
     }
 
     return nil
 }
 
-func unmarshalMap(r io.Reader, mp interface{}) error {
-    var rmp = reflect.ValueOf(mp)
-    var mapReflect = reflect.ValueOf(rmp.Elem().Interface())
-    var mapType = mapReflect.Type()
+func marshalMap(w io.Writer, mapValue interface{}) error {
+    switch m := mapValue.(type) {
+    case map[string]int8:
+        return marshalPrimitiveMap(w, m)
+    case map[string]int16:
+        return marshalPrimitiveMap(w, m)
+    case map[string]int32:
+        return marshalPrimitiveMap(w, m)
+    case map[string]int64:
+        return marshalPrimitiveMap(w, m)
 
+    case map[string]uint8:
+        return marshalPrimitiveMap(w, m)
+    case map[string]uint16:
+        return marshalPrimitiveMap(w, m)
+    case map[string]uint32:
+        return marshalPrimitiveMap(w, m)
+    case map[string]uint64:
+        return marshalPrimitiveMap(w, m)
+
+    case map[string]float32:
+        return marshalPrimitiveMap(w, m)
+    case map[string]float64:
+        return marshalPrimitiveMap(w, m)
+
+    case map[string]string:
+        return marshalPrimitiveMap(w, m)
+    }
+
+    mapValueReflect := reflect.ValueOf(mapValue)
+    mapLength := mapValueReflect.Len()
+    if err := binary.Write(w, binary.LittleEndian, int32(mapLength)); err != nil {
+        return fmt.Errorf("err write map length: %w", err)
+    }
+
+    for _, key := range mapValueReflect.MapKeys() {
+        value := mapValueReflect.MapIndex(key)
+        if err := marshal(key.Interface(), w); err != nil {
+            return fmt.Errorf("err marshal map key: %w", err)
+        }
+        if err := marshal(value.Interface(), w); err != nil {
+            return fmt.Errorf("err marshal map value: %w", err)
+        }
+    }
+
+    return nil
+}
+
+func unmarshalPrimitiveMap[V mapValues](r io.Reader, m *map[string]V) error {
+    var length int32
+    if err := binary.Read(r, binary.LittleEndian, &length); err != nil {
+        return fmt.Errorf("err read map length: %w", err)
+    }
+
+    if length < 0 {
+        return fmt.Errorf("invalid map length: %d", length)
+    }
+
+    result := make(map[string]V, length)
+    for i := int32(0); i < length; i++ {
+        var key string
+        if err := unmarshalString(r, &key); err != nil {
+            return fmt.Errorf("err read map key at %d: %w", i, err)
+        }
+
+        var value V
+        if err := unmarshal(&value, r); err != nil {
+            return fmt.Errorf("err read map value at %d: %w", i, err)
+        }
+
+        result[key] = value
+    }
+
+    *m = result
+    return nil
+}
+
+func unmarshalMap(r io.Reader, mp interface{}) error {
+    switch m := mp.(type) {
+    case *map[string]int8:
+        return unmarshalPrimitiveMap(r, m)
+    case *map[string]int16:
+        return unmarshalPrimitiveMap(r, m)
+    case *map[string]int32:
+        return unmarshalPrimitiveMap(r, m)
+    case *map[string]int64:
+        return unmarshalPrimitiveMap(r, m)
+
+    case *map[string]uint8:
+        return unmarshalPrimitiveMap(r, m)
+    case *map[string]uint16:
+        return unmarshalPrimitiveMap(r, m)
+    case *map[string]uint32:
+        return unmarshalPrimitiveMap(r, m)
+    case *map[string]uint64:
+        return unmarshalPrimitiveMap(r, m)
+
+    case *map[string]float32:
+        return unmarshalPrimitiveMap(r, m)
+    case *map[string]float64:
+        return unmarshalPrimitiveMap(r, m)
+
+    case *map[string]string:
+        return unmarshalPrimitiveMap(r, m)
+    }
+
+    rmp := reflect.ValueOf(mp)
+    mapReflect := reflect.ValueOf(rmp.Elem().Interface())
+    mapType := mapReflect.Type()
     mapValue := reflect.MakeMapWithSize(mapReflect.Type(), 0)
 
     var mapLength int32
-    if e := binary.Read(r, binary.LittleEndian, &mapLength); e != nil {
-        return fmt.Errorf("err read map length: %w", e)
+    if err := binary.Read(r, binary.LittleEndian, &mapLength); err != nil {
+        return fmt.Errorf("err read map length: %w", err)
     }
 
     for i := 0; i < int(mapLength); i++ {
-        var key = reflect.New(mapType.Key()).Interface()
-        if e := unmarshal(key, r); e != nil {
-            return fmt.Errorf("err unmarshal map key: %w", e)
+        key := reflect.New(mapType.Key()).Interface()
+        if err := unmarshal(key, r); err != nil {
+            return fmt.Errorf("err unmarshal map key: %w", err)
         }
 
-        var value = reflect.New(mapType.Elem()).Interface()
-        if e := unmarshal(value, r); e != nil {
-            return fmt.Errorf("err unmarshal map value: %w", e)
+        value := reflect.New(mapType.Elem()).Interface()
+        if err := unmarshal(value, r); err != nil {
+            return fmt.Errorf("err unmarshal map value: %w", err)
         }
+
         mapValue.SetMapIndex(reflect.ValueOf(key).Elem(), reflect.ValueOf(value).Elem())
     }
 
     rmp.Elem().Set(mapValue)
-
     return nil
 }
